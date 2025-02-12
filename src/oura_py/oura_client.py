@@ -162,6 +162,50 @@ class OuraClient:
             params = self.build_start_end_params(start_date, end_date)
             return self.client_request(url, params)
 
+    def get_bedtimes(
+        self,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        document_id: str | None = None,
+    ):
+        if document_id:
+            url = "".join([self.URL_BASE, "sleep_time/", document_id])
+            return self.client_request(url)
+        else:
+            url = "".join([self.URL_BASE, "sleep_time"])
+            params = self.build_start_end_params(start_date, end_date)
+            print(url)
+            print(params)
+            return self.client_request(url, params)
+
+    def get_vo2_max(
+        self,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        document_id: str | None = None,
+    ):
+        if document_id:
+            url = "".join([self.URL_BASE, "vO2_max/", document_id])
+            return self.client_request(url)
+        else:
+            url = "".join([self.URL_BASE, "vO2_max"])
+            params = self.build_start_end_params(start_date, end_date)
+            return self.client_request(url, params)
+
+    def get_workouts(
+        self,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        document_id: str | None = None,
+    ):
+        if document_id:
+            url = "".join([self.URL_BASE, "workout/", document_id])
+            return self.client_request(url)
+        else:
+            url = "".join([self.URL_BASE, "workout"])
+            params = self.build_start_end_params(start_date, end_date)
+            return self.client_request(url, params)
+
     def get_ring_config(self):
         url = "".join([self.URL_BASE, "ring_configuration"])
         return self.client_request(url)
