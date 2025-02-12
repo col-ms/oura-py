@@ -8,6 +8,7 @@ __pycache__/
 
 # Editor
 .vscode/
+notes/
 
 # Distribution / packaging
 .Python
