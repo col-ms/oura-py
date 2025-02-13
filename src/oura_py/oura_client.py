@@ -65,7 +65,7 @@ class OuraClient:
     def get_personal_info(self) -> PersonalInfo:
         result = self.get("personal_info")
         data = PersonalInfo(**result.data)
-        print(data)
+        return data
 
     def _request(
         self, method: str, endpoint: str, params: Dict = None, data: Dict = None

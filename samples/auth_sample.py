@@ -8,4 +8,5 @@ if __name__ == "__main__":
     load_dotenv()
     PAT = os.getenv("PERSONAL_ACCESS_TOKEN")
     myClient = OuraClient(personal_access_token=PAT)
-    print(myClient.get_personal_info())
+    personal_info = myClient.get_personal_info()
+    print(personal_info.email)
