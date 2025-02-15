@@ -94,7 +94,7 @@ class RingConfig:
         self.next_token = next_token
 
 
-class SleepContributors:
+class SleepSummaryContributors:
     def __init__(
         self,
         deep_sleep: int,
@@ -118,13 +118,13 @@ class SleepSummaryDatum:
     def __init__(
         self,
         id: str,
-        contributors: SleepContributors,
+        contributors: SleepSummaryContributors,
         day: datetime,
         score: int,
         timestamp: datetime,
     ) -> None:
         self.id = id
-        self.contributors = SleepContributors(**contributors)
+        self.contributors = SleepSummaryContributors(**contributors)
         self.day = day
         self.score = score
         self.timestamp = timestamp
@@ -135,4 +135,147 @@ class SleepSummary:
         self, data: List[SleepSummaryDatum], next_token: str | None = None
     ) -> None:
         self.data = [SleepSummaryDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class ReadinessSummaryContributors:
+    def __init__(
+        self,
+        activity_balance: int,
+        body_temperature: int,
+        hrv_balance: int,
+        previous_day_activity: int,
+        previous_night: int,
+        recovery_index: int,
+        resting_heart_rate: int,
+        sleep_balance: int,
+    ) -> None:
+        self.acitvity_balance = activity_balance
+        self.body_temperature = body_temperature
+        self.hrv_balance = hrv_balance
+        self.previous_day_activity = previous_day_activity
+        self.previous_night = previous_night
+        self.recovery_index = recovery_index
+        self.resting_heart_rate = resting_heart_rate
+        self.sleep_balance = sleep_balance
+
+
+class ReadinessSummaryDatum:
+    def __init__(
+        self,
+        id: str,
+        contributors: ReadinessSummaryContributors,
+        day: datetime,
+        score: int,
+        temperature_deviation: float,
+        temperature_trend_deviation: float,
+        timestamp: datetime,
+    ) -> None:
+        self.id = id
+        self.contributors = ReadinessSummaryContributors(**contributors)
+        self.day = day
+        self.score = score
+        self.temperature_deviation = temperature_deviation
+        self.temperature_trend_deviation = temperature_trend_deviation
+        self.timestamp = timestamp
+
+
+class ReadinessSummary:
+    def __init__(
+        self, data: List[ReadinessSummaryDatum], next_token: str | None = None
+    ) -> None:
+        self.data = [ReadinessSummaryDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class ActivitySummaryContributors:
+    def __init__(
+        self,
+        meet_daily_targets: int,
+        move_every_hour: int,
+        recovery_time: int,
+        stay_active: int,
+        training_frequency: int,
+        training_volume: int,
+    ) -> None:
+        self.meet_daily_targets = meet_daily_targets
+        self.move_every_hour = move_every_hour
+        self.recovery_time = recovery_time
+        self.stay_active = stay_active
+        self.training_frequency = training_frequency
+        self.training_volume = training_volume
+
+
+class ActivitySummaryMET:
+    def __init__(
+        self, interval: float, items: List[float], timestamp: datetime
+    ) -> None:
+        self.interval = interval
+        self.items = items
+        self.timestamp = timestamp
+
+
+class ActivitySummaryDatum:
+    def __init__(
+        self,
+        id: str,
+        class_5_min: str,
+        score: int,
+        active_calories: int,
+        average_met_minutes: float,
+        contributors: ActivitySummaryContributors,
+        equivalent_walking_distance: int,
+        high_activity_met_minutes: int,
+        high_activity_time: int,
+        inactivity_alerts: int,
+        low_activity_met_minutes: int,
+        low_activity_time: int,
+        medium_activity_met_minutes: int,
+        medium_activity_time: int,
+        met: ActivitySummaryMET,
+        meters_to_target: int,
+        non_wear_time: int,
+        resting_time: int,
+        sedentary_met_minutes: int,
+        sedentary_time: int,
+        steps: int,
+        target_calories: int,
+        target_meters: int,
+        total_calories: int,
+        day: datetime,
+        timestamp: datetime,
+    ) -> None:
+        self.id = id
+        self.class_5_min = class_5_min
+        self.score = score
+        self.active_calories = active_calories
+        self.average_met_minutes = average_met_minutes
+        self.contributors = ActivitySummaryContributors(**contributors)
+        self.equivalent_walking_distance = equivalent_walking_distance
+        self.high_activity_met_minutes = high_activity_met_minutes
+        self.high_activity_time = high_activity_time
+        self.inactivity_alerts = inactivity_alerts
+        self.low_activity_met_minutes = low_activity_met_minutes
+        self.low_activity_time = low_activity_time
+        self.medium_activity_met_minutes = medium_activity_met_minutes
+        self.medium_activity_time = medium_activity_time
+        self.met = ActivitySummaryMET(**met)
+        self.meters_to_target = meters_to_target
+        self.non_wear_time = non_wear_time
+        self.resting_time = resting_time
+        self.sedentary_met_minutes = sedentary_met_minutes
+        self.sedentary_time = sedentary_time
+        self.steps = steps
+        self.target_calories = target_calories
+        self.target_meters = target_meters
+        self.total_calories = total_calories
+        self.day = day
+        self.timestamp = timestamp
+
+
+class ActivitySummary:
+    def __init__(
+        self, data: List[ActivitySummaryDatum], next_token: str | None = None
+    ) -> None:
+        self.data = [ActivitySummaryDatum(**d) for d in data] if data else []
         self.next_token = next_token
