@@ -2,6 +2,7 @@ import requests
 from urllib3.exceptions import InsecureRequestWarning
 from typing import Dict
 from json import JSONDecodeError
+from datetime import date, timedelta
 import logging
 from .auth import PersonalTokenRequestHandler
 from .exceptions import OuraPyException
@@ -68,22 +69,16 @@ class OuraClient:
         end: str | None = None,
         next_token: str | None = None,
     ) -> SleepSummary:
-        if next_token is not None:
+        if next_token:
             self._logger.debug(msg=f"next_token={next_token}")
             endpoint = f"daily_sleep/{next_token}"
             result = self.get(endpoint=endpoint)
             data = SleepSummary(**result.data)
             return data
-        if isinstance(start, str) or isinstance(end, str):
-            params = {}
-            if start:
-                params["start_date"] = start
-            if end:
-                params["end_date"] = end
-            result = self.get("daily_sleep", params=params)
-            data = SleepSummary(**result.data)
-            return data
-        result = self.get("daily_sleep")
+        start_date, end_date = self._prep_dates(start, end)
+        result = self.get(
+            "daily_sleep", params={"start_date": start_date, "end_date": end_date}
+        )
         data = SleepSummary(**result.data)
         return data
 
@@ -101,6 +96,19 @@ class OuraClient:
         result = self.get(endpoint=endpoint)
         data = RingConfig(**result.data)
         return data
+
+    def _prep_dates(
+        self, start_date: str | None = None, end_date: str | None = None
+    ) -> tuple[str, str]:
+        end = date.fromisoformat(end_date) if end_date else date.today()
+        start = (
+            date.fromisoformat(start_date) if start_date else end - timedelta(days=1)
+        )
+        if start > end:
+            log_msg = f"Start date must be before end date. Provided start: {start_date}, end: {end_date}"
+            self._logger.error(msg=log_msg)
+            raise OuraPyException("Start date must be before end date.")
+        return str(start), str(end)
 
     def _request(
         self, method: str, endpoint: str, params: Dict = None, data: Dict = None
