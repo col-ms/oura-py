@@ -6,12 +6,20 @@ from datetime import date, timedelta
 import logging
 from .auth import PersonalTokenRequestHandler
 from .exceptions import OuraPyException
-from .models import Result, PersonalInfo, RingConfig, SleepSummary
+from .models import (
+    Result,
+    PersonalInfo,
+    RingConfig,
+    SleepSummary,
+    SleepSummaryDatum,
+    ReadinessSummary,
+    ReadinessSummaryDatum,
+    ActivitySummary,
+    ActivitySummaryDatum,
+)
 
 
 class OuraClient:
-    URL_BASE = "https://api.ouraring.com/v2/usercollection/"
-
     def __init__(
         self,
         personal_access_token: str,
@@ -68,18 +76,53 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
-    ) -> SleepSummary:
+    ) -> SleepSummary | SleepSummaryDatum:
         if next_token:
             self._logger.debug(msg=f"next_token={next_token}")
-            endpoint = f"daily_sleep/{next_token}"
-            result = self.get(endpoint=endpoint)
-            data = SleepSummary(**result.data)
+            result = self.get(f"daily_sleep/{next_token}")
+            data = SleepSummaryDatum(**result.data)
             return data
         start_date, end_date = self._prep_dates(start, end)
         result = self.get(
             "daily_sleep", params={"start_date": start_date, "end_date": end_date}
         )
         data = SleepSummary(**result.data)
+        return data
+
+    def get_readiness_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> ReadinessSummary | ReadinessSummaryDatum:
+        if next_token:
+            self._logger.debug(msg=f"next_token={next_token}")
+            result = self.get(f"daily_readiness/{next_token}")
+            data = ReadinessSummaryDatum(**result.data)
+            return data
+        start_date, end_date = self._prep_dates(start, end)
+        result = self.get(
+            "daily_readiness", params={"start_date": start_date, "end_date": end_date}
+        )
+        data = ReadinessSummary(**result.data)
+        return data
+
+    def get_activity_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> ActivitySummary | ActivitySummaryDatum:
+        if next_token:
+            self._logger.debug(msg=f"next_token={next_token}")
+            result = self.get(f"daily_activity/{next_token}")
+            data = ActivitySummaryDatum(**result.data)
+            return data
+        start_date, end_date = self._prep_dates(start, end)
+        result = self.get(
+            "daily_activity", params={"start_date": start_date, "end_date": end_date}
+        )
+        data = ActivitySummary(**result.data)
         return data
 
     def get_personal_info(self) -> PersonalInfo:
