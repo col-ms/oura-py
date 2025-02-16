@@ -8,5 +8,4 @@ if __name__ == "__main__":
     load_dotenv()
     PAT = os.getenv("PERSONAL_ACCESS_TOKEN")
     myClient = OuraClient(personal_access_token=PAT)
-    summary = myClient.get_activity_summary()
-    print(type(summary.data[0].day))
+    summary = myClient.get_heartrate_summary()
