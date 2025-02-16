@@ -279,3 +279,45 @@ class ActivitySummary:
     ) -> None:
         self.data = [ActivitySummaryDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class HeartRateDatum:
+    def __init__(
+        self,
+        bpm: int,
+        source: str,
+        timestamp: datetime,
+    ) -> None:
+        self.bpm = bpm
+        self.source = source
+        self.timestamp = timestamp
+
+
+class HeartRateSummary:
+    def __init__(
+        self, data: List[HeartRateDatum], next_token: str | None = None
+    ) -> None:
+        self.data = [HeartRateDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class StressDatum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        stress_high: int,
+        stress_low: int,
+        day_summary: str,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.stress_high = stress_high
+        self.stress_low = stress_low
+        self.day_summary = day_summary
+
+
+class StressSummary:
+    def __init__(self, data: List[StressDatum], next_token: str | None = None) -> None:
+        self.data = [StressDatum(**d) for d in data] if data else []
+        self.next_token = next_token

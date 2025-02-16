@@ -11,6 +11,8 @@ from .models import (
     ReadinessSummaryDatum,
     ActivitySummary,
     ActivitySummaryDatum,
+    HeartRateSummary,
+    HeartRateDatum,
 )
 
 
@@ -52,7 +54,7 @@ class OuraClient:
         next_token: str | None = None,
     ) -> SleepSummary | SleepSummaryDatum:
         return self._get_summary_generic(
-            summary_type="sleep",
+            summary_endpoint="daily_sleep",
             data_class=SleepSummary,
             data_class_datum=SleepSummaryDatum,
             start=start,
@@ -67,7 +69,7 @@ class OuraClient:
         next_token: str | None = None,
     ) -> ReadinessSummary | ReadinessSummaryDatum:
         return self._get_summary_generic(
-            summary_type="readiness",
+            summary_endpoint="daily_readiness",
             data_class=ReadinessSummary,
             data_class_datum=ReadinessSummaryDatum,
             start=start,
@@ -82,9 +84,24 @@ class OuraClient:
         next_token: str | None = None,
     ) -> ActivitySummary | ActivitySummaryDatum:
         return self._get_summary_generic(
-            summary_type="activity",
+            summary_endpoint="daily_activity",
             data_class=ActivitySummary,
             data_class_datum=ActivitySummaryDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_heartrate_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> HeartRateSummary | HeartRateDatum:
+        return self._get_summary_generic(
+            summary_endpoint="heartrate",
+            data_class=HeartRateSummary,
+            data_class_datum=HeartRateDatum,
             start=start,
             end=end,
             next_token=next_token,
@@ -107,7 +124,7 @@ class OuraClient:
 
     def _get_summary_generic(
         self,
-        summary_type: str,
+        summary_endpoint: str,
         data_class: type,
         data_class_datum: type,
         start: str | None = None,
@@ -116,12 +133,12 @@ class OuraClient:
     ):
         if next_token:
             self._logger.debug(msg=f"next_token={next_token}")
-            result = self._manager.get(f"daily_{summary_type}/{next_token}")
+            result = self._manager.get(f"{summary_endpoint}/{next_token}")
             data = data_class_datum(**result.data)
             return data
         start_date, end_date = self._prep_dates(start, end)
         result = self._manager.get(
-            f"daily_{summary_type}",
+            f"{summary_endpoint}",
             params={"start_date": start_date, "end_date": end_date},
         )
         data = data_class(**result.data)
