@@ -11,20 +11,23 @@ class RequestManager:
     def __init__(
         self,
         personal_access_token: str,
-        url: str,
+        hostname: str,
+        ver: str,
+        path: str,
         ssl_verify: bool = True,
         logger: logging.Logger = None,
-    ):
+    ) -> None:
         """HTTP request manager.
 
         Args:
             personal_access_token (str): The personal access token for authenticating with the Oura API.
             hostname (str): The API hostname.
             ver (str): The API version.
+            path (str): The API path.
             ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
             logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
         """
-        self.url = url
+        self._url = f"https://{hostname}/{ver}/{path}"
         self._personal_access_token = personal_access_token
         self._ssl_verify = ssl_verify
         self._logger = logger or logging.getLogger(__name__)
@@ -75,7 +78,7 @@ class RequestManager:
         Raises:
             OuraPyException: If there is an error making the request or if the response contains bad JSON.
         """
-        url = f"{self.url}/{endpoint}"
+        url = f"{self._url}/{endpoint}"
         headers = {"Authorization": f"Bearer {self._personal_access_token}"}
         log_pre = f"method={method}, url={url}, params={params}"
         log_post = ", ".join(("success={}", "status_code={}", "message={}"))

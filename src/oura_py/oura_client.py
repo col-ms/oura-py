@@ -20,6 +20,7 @@ class OuraClient:
         personal_access_token: str,
         hostname: str = "api.ouraring.com",
         ver: str = "v2",
+        path: str = "usercollection",
         ssl_verify: bool = True,
         logger: logging.Logger = None,
     ):
@@ -29,17 +30,18 @@ class OuraClient:
             personal_access_token (str): The personal access token for authenticating with the Oura API.
             hostname (str, optional): The API hostname. Defaults to "api.ouraring.com".
             ver (str, optional): The API version. Defaults to "v2".
+            path (str, optional): The API path. Defaults to "usercollection".
             ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
             logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
         """
-        self.url = f"https://{hostname}/{ver}/usercollection"
-        self._personal_access_token = personal_access_token
-        self._ssl_verify = ssl_verify
+        self.url = f"https://{hostname}/{ver}/{path}"
         self._logger = logger or logging.getLogger(__name__)
         self._manager = RequestManager(
-            personal_access_token=self._personal_access_token,
-            url=self.url,
-            ssl_verify=self._ssl_verify,
+            personal_access_token=personal_access_token,
+            hostname=hostname,
+            ver=ver,
+            path=path,
+            ssl_verify=ssl_verify,
             logger=self._logger,
         )
 
