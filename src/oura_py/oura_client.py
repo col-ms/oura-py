@@ -77,17 +77,14 @@ class OuraClient:
         end: str | None = None,
         next_token: str | None = None,
     ) -> SleepSummary | SleepSummaryDatum:
-        if next_token:
-            self._logger.debug(msg=f"next_token={next_token}")
-            result = self.get(f"daily_sleep/{next_token}")
-            data = SleepSummaryDatum(**result.data)
-            return data
-        start_date, end_date = self._prep_dates(start, end)
-        result = self.get(
-            "daily_sleep", params={"start_date": start_date, "end_date": end_date}
+        return self._get_summary_generic(
+            summary_type="sleep",
+            data_class=SleepSummary,
+            data_class_datum=SleepSummaryDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
         )
-        data = SleepSummary(**result.data)
-        return data
 
     def get_readiness_summary(
         self,
@@ -95,17 +92,14 @@ class OuraClient:
         end: str | None = None,
         next_token: str | None = None,
     ) -> ReadinessSummary | ReadinessSummaryDatum:
-        if next_token:
-            self._logger.debug(msg=f"next_token={next_token}")
-            result = self.get(f"daily_readiness/{next_token}")
-            data = ReadinessSummaryDatum(**result.data)
-            return data
-        start_date, end_date = self._prep_dates(start, end)
-        result = self.get(
-            "daily_readiness", params={"start_date": start_date, "end_date": end_date}
+        return self._get_summary_generic(
+            summary_type="readiness",
+            data_class=ReadinessSummary,
+            data_class_datum=ReadinessSummaryDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
         )
-        data = ReadinessSummary(**result.data)
-        return data
 
     def get_activity_summary(
         self,
@@ -113,16 +107,35 @@ class OuraClient:
         end: str | None = None,
         next_token: str | None = None,
     ) -> ActivitySummary | ActivitySummaryDatum:
+        return self._get_summary_generic(
+            summary_type="activity",
+            data_class=ActivitySummary,
+            data_class_datum=ActivitySummaryDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def _get_summary_generic(
+        self,
+        summary_type: str,
+        data_class: type,
+        data_class_datum: type,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ):
         if next_token:
             self._logger.debug(msg=f"next_token={next_token}")
-            result = self.get(f"daily_activity/{next_token}")
-            data = ActivitySummaryDatum(**result.data)
+            result = self.get(f"daily_{summary_type}/{next_token}")
+            data = data_class_datum(**result.data)
             return data
         start_date, end_date = self._prep_dates(start, end)
         result = self.get(
-            "daily_activity", params={"start_date": start_date, "end_date": end_date}
+            f"daily_{summary_type}",
+            params={"start_date": start_date, "end_date": end_date},
         )
-        data = ActivitySummary(**result.data)
+        data = data_class(**result.data)
         return data
 
     def get_personal_info(self) -> PersonalInfo:
