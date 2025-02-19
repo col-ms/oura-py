@@ -307,17 +307,51 @@ class StressDatum:
         id: str,
         day: datetime,
         stress_high: int,
-        stress_low: int,
+        recovery_high: int,
         day_summary: str,
     ) -> None:
         self.id = id
         self.day = day
         self.stress_high = stress_high
-        self.stress_low = stress_low
+        self.recovery_high = recovery_high
         self.day_summary = day_summary
 
 
 class StressSummary:
     def __init__(self, data: List[StressDatum], next_token: str | None = None) -> None:
         self.data = [StressDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class ResilienceContributors:
+    def __init__(
+        self,
+        sleep_recovery: float,
+        daytime_recovery: float,
+        stress: float,
+    ) -> None:
+        self.sleep_recovery = sleep_recovery
+        self.daytime_recovery = daytime_recovery
+        self.stress = stress
+
+
+class ResilienceDatum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        contributors: ResilienceContributors,
+        level: str,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.contributors = ResilienceContributors(**contributors)
+        self.level = level
+
+
+class ResilienceSummary:
+    def __init__(
+        self, data: List[ResilienceDatum], next_token: str | None = None
+    ) -> None:
+        self.data = [ResilienceDatum(**d) for d in data] if data else []
         self.next_token = next_token

@@ -13,6 +13,10 @@ from .models import (
     ActivitySummaryDatum,
     HeartRateSummary,
     HeartRateDatum,
+    StressSummary,
+    StressDatum,
+    ResilienceSummary,
+    ResilienceDatum,
 )
 
 
@@ -102,6 +106,36 @@ class OuraClient:
             summary_endpoint="heartrate",
             data_class=HeartRateSummary,
             data_class_datum=HeartRateDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_stress_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> StressSummary | StressDatum:
+        return self._get_summary_generic(
+            summary_endpoint="daily_stress",
+            data_class=StressSummary,
+            data_class_datum=StressDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_resilience_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> ResilienceSummary | ResilienceDatum:
+        return self._get_summary_generic(
+            summary_endpoint="daily_resilience",
+            data_class=ResilienceSummary,
+            data_class_datum=ResilienceDatum,
             start=start,
             end=end,
             next_token=next_token,
