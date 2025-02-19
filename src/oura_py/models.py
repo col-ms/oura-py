@@ -355,3 +355,59 @@ class ResilienceSummary:
     ) -> None:
         self.data = [ResilienceDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class Spo2Datum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        spo2_percentage: float,
+        breathing_disturbance_index: int,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.spo2_percentage_avg = spo2_percentage["average"]
+        self.breathing_disturbance_index = breathing_disturbance_index
+
+
+class Spo2Summary:
+    def __init__(
+        self,
+        data: List[Spo2Datum],
+        next_token: str | None = None,
+    ) -> None:
+        self.data = [Spo2Datum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class TagDatum:
+    def __init__(
+        self,
+        id: str,
+        tag_type_code: str,
+        start_time: datetime,
+        end_time: datetime | None,
+        start_day: datetime,
+        end_day: datetime,
+        comment: str,
+        custom_name: str,
+    ) -> None:
+        self.id = id
+        self.tag_type_code = tag_type_code
+        self.start_time = start_time
+        self.end_time = end_time
+        self.start_day = start_day
+        self.end_day = end_day
+        self.comment = comment
+        self.custom_name = custom_name
+
+
+class TagSummary:
+    def __init__(
+        self,
+        data: List[TagDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [TagDatum(**d) for d in data] if data else []
+        self.next_token = next_token

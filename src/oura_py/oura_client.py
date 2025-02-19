@@ -17,6 +17,10 @@ from .models import (
     StressDatum,
     ResilienceSummary,
     ResilienceDatum,
+    Spo2Summary,
+    Spo2Datum,
+    TagSummary,
+    TagDatum,
 )
 
 
@@ -136,6 +140,36 @@ class OuraClient:
             summary_endpoint="daily_resilience",
             data_class=ResilienceSummary,
             data_class_datum=ResilienceDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_spo2_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> Spo2Summary | Spo2Datum:
+        return self._get_summary_generic(
+            summary_endpoint="daily_spo2",
+            data_class=Spo2Summary,
+            data_class_datum=Spo2Datum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_tags_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> TagSummary | TagDatum:
+        return self._get_summary_generic(
+            summary_endpoint="enhanced_tag",
+            data_class=TagSummary,
+            data_class_datum=TagDatum,
             start=start,
             end=end,
             next_token=next_token,
