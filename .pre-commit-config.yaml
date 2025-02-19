@@ -18,4 +18,4 @@ repos:
           "-rn",
           "-sn",
         ]
-      stages: [push]
+      stages: [pre-push]
