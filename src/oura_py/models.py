@@ -441,3 +441,49 @@ class RestModePeriodSummary:
     def __init__(self, data: List[RestModePeriodDatum], next_token: str | None) -> None:
         self.data = [RestModePeriodDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class SessionMeasureInfo:
+    def __init__(
+        self,
+        interval: int,
+        items: List[float | None],
+        timestamp: datetime,
+    ) -> None:
+        self.interval = interval
+        self.items = items
+        self.timestamp = timestamp
+
+
+class SessionDatum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        start_datetime: datetime,
+        end_datetime: datetime,
+        type: str,
+        heart_rate: SessionMeasureInfo,
+        heart_rate_variability: SessionMeasureInfo,
+        mood: str,
+        motion_count: SessionMeasureInfo,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.start_datetime = start_datetime
+        self.end_datetime = end_datetime
+        self.type = type
+        self.heart_rate = SessionMeasureInfo(**heart_rate)
+        self.heart_rate_variability = SessionMeasureInfo(**heart_rate_variability)
+        self.mood = mood
+        self.motion_count = SessionMeasureInfo(**motion_count)
+
+
+class SessionData:
+    def __init__(
+        self,
+        data: List[SessionDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [SessionDatum(**d) for d in data] if data else []
+        self.next_token = next_token
