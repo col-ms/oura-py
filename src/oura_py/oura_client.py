@@ -21,6 +21,8 @@ from .models import (
     Spo2Datum,
     TagSummary,
     TagDatum,
+    RestModePeriodSummary,
+    RestModePeriodDatum,
 )
 
 
@@ -170,6 +172,21 @@ class OuraClient:
             summary_endpoint="enhanced_tag",
             data_class=TagSummary,
             data_class_datum=TagDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_rest_mode_periods(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> RestModePeriodSummary | RestModePeriodDatum:
+        return self._get_summary_generic(
+            summary_endpoint="rest_mode_period",
+            data_class=RestModePeriodSummary,
+            data_class_datum=RestModePeriodDatum,
             start=start,
             end=end,
             next_token=next_token,

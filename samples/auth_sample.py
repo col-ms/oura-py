@@ -8,8 +8,8 @@ if __name__ == "__main__":
     load_dotenv()
     PAT = os.getenv("PERSONAL_ACCESS_TOKEN")
     myClient = OuraClient(personal_access_token=PAT)
-    summary = myClient.get_tags_summary(start="2025-02-19", end="2025-02-25")
+    summary = myClient.get_rest_mode_periods(start="2025-01-01")
     print(
-        summary.data[1].comment,
+        summary.data[0].end_day,
         type(summary.next_token),
     )

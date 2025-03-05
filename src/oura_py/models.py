@@ -411,3 +411,33 @@ class TagSummary:
     ) -> None:
         self.data = [TagDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class RestModeEpisodes:
+    def __init__(self, tags: List[str], timestamp: datetime) -> None:
+        self.tags = tags
+        self.timestamp = timestamp
+
+
+class RestModePeriodDatum:
+    def __init__(
+        self,
+        id: str,
+        end_day: datetime,
+        end_time: datetime,
+        episodes: RestModeEpisodes,
+        start_day: datetime,
+        start_time: datetime,
+    ) -> None:
+        self.id = id
+        self.end_day = end_day
+        self.end_time = end_time
+        self.episodes = RestModeEpisodes(**episodes[0])
+        self.start_day = start_day
+        self.start_time = start_time
+
+
+class RestModePeriodSummary:
+    def __init__(self, data: List[RestModePeriodDatum], next_token: str | None) -> None:
+        self.data = [RestModePeriodDatum(**d) for d in data] if data else []
+        self.next_token = next_token
