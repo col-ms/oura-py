@@ -8,8 +8,5 @@ if __name__ == "__main__":
     load_dotenv()
     PAT = os.getenv("PERSONAL_ACCESS_TOKEN")
     myClient = OuraClient(personal_access_token=PAT)
-    summary = myClient.get_session_data(start="2023-09-01")
-    print(
-        summary.data[0].type,
-        type(summary.next_token),
-    )
+    summary = myClient.get_sleep_detail()
+    print(summary.data[0].readiness.score)

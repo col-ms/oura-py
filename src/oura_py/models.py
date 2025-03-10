@@ -487,3 +487,77 @@ class SessionData:
     ) -> None:
         self.data = [SessionDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class SleepDetailDatum:
+    def __init__(
+        self,
+        id: str,
+        average_breath: float,
+        average_heart_rate: float,
+        average_hrv: int,
+        awake_time: int,
+        bedtime_end: datetime,
+        bedtime_start: datetime,
+        day: datetime,
+        deep_sleep_duration: int,
+        efficiency: int,
+        heart_rate: SessionMeasureInfo,
+        hrv: SessionMeasureInfo,
+        latency: int,
+        light_sleep_duration: int,
+        low_battery_alert: bool,
+        lowest_heart_rate: int,
+        movement_30_sec: str,
+        period: int,
+        readiness: ReadinessSummaryDatum,
+        readiness_score_delta: int,
+        rem_sleep_duration: int,
+        restless_periods: int,
+        sleep_phase_5_min: str,
+        sleep_score_delta: int,
+        sleep_algorithm_version: str,
+        time_in_bed: int,
+        total_sleep_duration: int,
+        type: str,
+    ) -> None:
+        self.id = id
+        self.avaverage_breath = average_breath
+        self.avaverage_heart_rate = average_heart_rate
+        self.average_hrv = average_hrv
+        self.awake_time = awake_time
+        self.bedtime_end = bedtime_end
+        self.bedtime_start = bedtime_start
+        self.day = day
+        self.deep_sleep_duration = deep_sleep_duration
+        self.efficiency = efficiency
+        self.heart_rate = SessionMeasureInfo(**heart_rate)
+        self.hrv = SessionMeasureInfo(**hrv)
+        self.latency = latency
+        self.light_sleep_duration = light_sleep_duration
+        self.low_battery_alert = low_battery_alert
+        self.lowest_heart_rate = lowest_heart_rate
+        self.movement_30_sec = movement_30_sec
+        self.period = period
+        self.readiness = ReadinessSummaryDatum(
+            **readiness, id=None, timestamp=bedtime_start, day=day
+        )
+        self.readiness_score_delta = readiness_score_delta
+        self.rem_sleep_duration = rem_sleep_duration
+        self.restless_periods = restless_periods
+        self.sleep_phase_5_min = sleep_phase_5_min
+        self.sleep_score_delta = sleep_score_delta
+        self.sleep_algorithm_version = sleep_algorithm_version
+        self.time_in_bed = time_in_bed
+        self.total_sleep_duration = total_sleep_duration
+        self.type = type
+
+
+class SleepDetailData:
+    def __init__(
+        self,
+        data: List[SleepDetailDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [SleepDetailDatum(**d) for d in data] if data else []
+        self.next_token = next_token
