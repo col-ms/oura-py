@@ -561,3 +561,38 @@ class SleepDetailData:
     ) -> None:
         self.data = [SleepDetailDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class SleepTimeWindow:
+    def __init__(self, day_tz: int, end_offset: int, start_offset: int) -> None:
+        self.day_tz = day_tz
+        self.end_offset = end_offset
+        self.start_offset = start_offset
+
+
+class SleepTimeDatum:
+    def __init__(
+        self,
+        id: str,
+        day: str,
+        optimal_bedtime: SleepTimeWindow | None,
+        recommendation: str,
+        status: str,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.optimal_bedtime = (
+            SleepTimeWindow(**optimal_bedtime) if optimal_bedtime else None
+        )
+        self.recommendation = recommendation
+        self.status = status
+
+
+class SleepTimeData:
+    def __init__(
+        self,
+        data: List[SleepTimeDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [SleepTimeDatum(**d) for d in data] if data else []
+        self.next_token = next_token

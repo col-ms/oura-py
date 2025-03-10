@@ -27,6 +27,8 @@ from .models import (
     SessionDatum,
     SleepDetailData,
     SleepDetailDatum,
+    SleepTimeData,
+    SleepTimeDatum,
 )
 
 
@@ -221,6 +223,21 @@ class OuraClient:
             summary_endpoint="sleep",
             data_class=SleepDetailData,
             data_class_datum=SleepDetailDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_sleep_times(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> SleepTimeData | SleepTimeDatum:
+        return self._get_summary_generic(
+            summary_endpoint="sleep_time",
+            data_class=SleepTimeData,
+            data_class_datum=SleepTimeDatum,
             start=start,
             end=end,
             next_token=next_token,
