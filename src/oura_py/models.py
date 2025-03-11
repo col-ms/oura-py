@@ -307,17 +307,352 @@ class StressDatum:
         id: str,
         day: datetime,
         stress_high: int,
-        stress_low: int,
+        recovery_high: int,
         day_summary: str,
     ) -> None:
         self.id = id
         self.day = day
         self.stress_high = stress_high
-        self.stress_low = stress_low
+        self.recovery_high = recovery_high
         self.day_summary = day_summary
 
 
 class StressSummary:
     def __init__(self, data: List[StressDatum], next_token: str | None = None) -> None:
         self.data = [StressDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class ResilienceContributors:
+    def __init__(
+        self,
+        sleep_recovery: float,
+        daytime_recovery: float,
+        stress: float,
+    ) -> None:
+        self.sleep_recovery = sleep_recovery
+        self.daytime_recovery = daytime_recovery
+        self.stress = stress
+
+
+class ResilienceDatum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        contributors: ResilienceContributors,
+        level: str,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.contributors = ResilienceContributors(**contributors)
+        self.level = level
+
+
+class ResilienceSummary:
+    def __init__(
+        self, data: List[ResilienceDatum], next_token: str | None = None
+    ) -> None:
+        self.data = [ResilienceDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class Spo2Datum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        spo2_percentage: float,
+        breathing_disturbance_index: int,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.spo2_percentage_avg = spo2_percentage["average"]
+        self.breathing_disturbance_index = breathing_disturbance_index
+
+
+class Spo2Summary:
+    def __init__(
+        self,
+        data: List[Spo2Datum],
+        next_token: str | None = None,
+    ) -> None:
+        self.data = [Spo2Datum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class TagDatum:
+    def __init__(
+        self,
+        id: str,
+        tag_type_code: str,
+        start_time: datetime,
+        end_time: datetime | None,
+        start_day: datetime,
+        end_day: datetime,
+        comment: str,
+        custom_name: str,
+    ) -> None:
+        self.id = id
+        self.tag_type_code = tag_type_code
+        self.start_time = start_time
+        self.end_time = end_time
+        self.start_day = start_day
+        self.end_day = end_day
+        self.comment = comment
+        self.custom_name = custom_name
+
+
+class TagSummary:
+    def __init__(
+        self,
+        data: List[TagDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [TagDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class RestModeEpisodes:
+    def __init__(self, tags: List[str], timestamp: datetime) -> None:
+        self.tags = tags
+        self.timestamp = timestamp
+
+
+class RestModePeriodDatum:
+    def __init__(
+        self,
+        id: str,
+        end_day: datetime,
+        end_time: datetime,
+        episodes: RestModeEpisodes,
+        start_day: datetime,
+        start_time: datetime,
+    ) -> None:
+        self.id = id
+        self.end_day = end_day
+        self.end_time = end_time
+        self.episodes = RestModeEpisodes(**episodes[0])
+        self.start_day = start_day
+        self.start_time = start_time
+
+
+class RestModePeriodSummary:
+    def __init__(self, data: List[RestModePeriodDatum], next_token: str | None) -> None:
+        self.data = [RestModePeriodDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class SessionMeasureInfo:
+    def __init__(
+        self,
+        interval: int,
+        items: List[float | None],
+        timestamp: datetime,
+    ) -> None:
+        self.interval = interval
+        self.items = items
+        self.timestamp = timestamp
+
+
+class SessionDatum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        start_datetime: datetime,
+        end_datetime: datetime,
+        type: str,
+        heart_rate: SessionMeasureInfo,
+        heart_rate_variability: SessionMeasureInfo,
+        mood: str,
+        motion_count: SessionMeasureInfo,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.start_datetime = start_datetime
+        self.end_datetime = end_datetime
+        self.type = type
+        self.heart_rate = SessionMeasureInfo(**heart_rate)
+        self.heart_rate_variability = SessionMeasureInfo(**heart_rate_variability)
+        self.mood = mood
+        self.motion_count = SessionMeasureInfo(**motion_count)
+
+
+class SessionData:
+    def __init__(
+        self,
+        data: List[SessionDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [SessionDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class SleepDetailDatum:
+    def __init__(
+        self,
+        id: str,
+        average_breath: float,
+        average_heart_rate: float,
+        average_hrv: int,
+        awake_time: int,
+        bedtime_end: datetime,
+        bedtime_start: datetime,
+        day: datetime,
+        deep_sleep_duration: int,
+        efficiency: int,
+        heart_rate: SessionMeasureInfo,
+        hrv: SessionMeasureInfo,
+        latency: int,
+        light_sleep_duration: int,
+        low_battery_alert: bool,
+        lowest_heart_rate: int,
+        movement_30_sec: str,
+        period: int,
+        readiness: ReadinessSummaryDatum,
+        readiness_score_delta: int,
+        rem_sleep_duration: int,
+        restless_periods: int,
+        sleep_phase_5_min: str,
+        sleep_score_delta: int,
+        sleep_algorithm_version: str,
+        time_in_bed: int,
+        total_sleep_duration: int,
+        type: str,
+    ) -> None:
+        self.id = id
+        self.avaverage_breath = average_breath
+        self.avaverage_heart_rate = average_heart_rate
+        self.average_hrv = average_hrv
+        self.awake_time = awake_time
+        self.bedtime_end = bedtime_end
+        self.bedtime_start = bedtime_start
+        self.day = day
+        self.deep_sleep_duration = deep_sleep_duration
+        self.efficiency = efficiency
+        self.heart_rate = SessionMeasureInfo(**heart_rate)
+        self.hrv = SessionMeasureInfo(**hrv)
+        self.latency = latency
+        self.light_sleep_duration = light_sleep_duration
+        self.low_battery_alert = low_battery_alert
+        self.lowest_heart_rate = lowest_heart_rate
+        self.movement_30_sec = movement_30_sec
+        self.period = period
+        self.readiness = ReadinessSummaryDatum(
+            **readiness, id=None, timestamp=bedtime_start, day=day
+        )
+        self.readiness_score_delta = readiness_score_delta
+        self.rem_sleep_duration = rem_sleep_duration
+        self.restless_periods = restless_periods
+        self.sleep_phase_5_min = sleep_phase_5_min
+        self.sleep_score_delta = sleep_score_delta
+        self.sleep_algorithm_version = sleep_algorithm_version
+        self.time_in_bed = time_in_bed
+        self.total_sleep_duration = total_sleep_duration
+        self.type = type
+
+
+class SleepDetailData:
+    def __init__(
+        self,
+        data: List[SleepDetailDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [SleepDetailDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class SleepTimeWindow:
+    def __init__(self, day_tz: int, end_offset: int, start_offset: int) -> None:
+        self.day_tz = day_tz
+        self.end_offset = end_offset
+        self.start_offset = start_offset
+
+
+class SleepTimeDatum:
+    def __init__(
+        self,
+        id: str,
+        day: str,
+        optimal_bedtime: SleepTimeWindow | None,
+        recommendation: str,
+        status: str,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.optimal_bedtime = (
+            SleepTimeWindow(**optimal_bedtime) if optimal_bedtime else None
+        )
+        self.recommendation = recommendation
+        self.status = status
+
+
+class SleepTimeData:
+    def __init__(
+        self,
+        data: List[SleepTimeDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [SleepTimeDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class VO2MaxDatum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        timestamp: datetime,
+        vo2_max: int,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.timestamp = timestamp
+        self.vo2_max = vo2_max
+
+
+class VO2MaxData:
+    def __init__(
+        self,
+        data: List[VO2MaxDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [VO2MaxDatum(**d) for d in data] if data else []
+        self.next_token = next_token
+
+
+class WorkoutDatum:
+    def __init__(
+        self,
+        id: str,
+        activity: str,
+        calories: float,
+        day: datetime,
+        distance: float,
+        end_datetime: datetime,
+        intensity: str,
+        label: str,
+        source: str,
+        start_datetime: datetime,
+    ) -> None:
+        self.id = id
+        self.activity = activity
+        self.calories = calories
+        self.day = day
+        self.distance = distance
+        self.end_datetime = end_datetime
+        self.intensity = intensity
+        self.label = label
+        self.source = source
+        self.start_datetime = start_datetime
+
+
+class WorkoutData:
+    def __init__(
+        self,
+        data: List[WorkoutDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [WorkoutDatum(**d) for d in data] if data else []
         self.next_token = next_token

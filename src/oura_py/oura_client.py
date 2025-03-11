@@ -13,6 +13,26 @@ from .models import (
     ActivitySummaryDatum,
     HeartRateSummary,
     HeartRateDatum,
+    StressSummary,
+    StressDatum,
+    ResilienceSummary,
+    ResilienceDatum,
+    Spo2Summary,
+    Spo2Datum,
+    TagSummary,
+    TagDatum,
+    RestModePeriodSummary,
+    RestModePeriodDatum,
+    SessionData,
+    SessionDatum,
+    SleepDetailData,
+    SleepDetailDatum,
+    SleepTimeData,
+    SleepTimeDatum,
+    VO2MaxData,
+    VO2MaxDatum,
+    WorkoutData,
+    WorkoutDatum,
 )
 
 
@@ -102,6 +122,156 @@ class OuraClient:
             summary_endpoint="heartrate",
             data_class=HeartRateSummary,
             data_class_datum=HeartRateDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_stress_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> StressSummary | StressDatum:
+        return self._get_summary_generic(
+            summary_endpoint="daily_stress",
+            data_class=StressSummary,
+            data_class_datum=StressDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_resilience_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> ResilienceSummary | ResilienceDatum:
+        return self._get_summary_generic(
+            summary_endpoint="daily_resilience",
+            data_class=ResilienceSummary,
+            data_class_datum=ResilienceDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_spo2_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> Spo2Summary | Spo2Datum:
+        return self._get_summary_generic(
+            summary_endpoint="daily_spo2",
+            data_class=Spo2Summary,
+            data_class_datum=Spo2Datum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_tags_summary(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> TagSummary | TagDatum:
+        return self._get_summary_generic(
+            summary_endpoint="enhanced_tag",
+            data_class=TagSummary,
+            data_class_datum=TagDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_rest_mode_periods(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> RestModePeriodSummary | RestModePeriodDatum:
+        return self._get_summary_generic(
+            summary_endpoint="rest_mode_period",
+            data_class=RestModePeriodSummary,
+            data_class_datum=RestModePeriodDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_session_data(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> SessionData | SessionDatum:
+        return self._get_summary_generic(
+            summary_endpoint="session",
+            data_class=SessionData,
+            data_class_datum=SessionDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_sleep_detail(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> SleepDetailData | SleepDetailDatum:
+        return self._get_summary_generic(
+            summary_endpoint="sleep",
+            data_class=SleepDetailData,
+            data_class_datum=SleepDetailDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_sleep_times(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> SleepTimeData | SleepTimeDatum:
+        return self._get_summary_generic(
+            summary_endpoint="sleep_time",
+            data_class=SleepTimeData,
+            data_class_datum=SleepTimeDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_vo2_max(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> VO2MaxData | VO2MaxDatum:
+        return self._get_summary_generic(
+            summary_endpoint="vO2_max",
+            data_class=VO2MaxData,
+            data_class_datum=VO2MaxDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_workouts(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> WorkoutData | WorkoutDatum:
+        return self._get_summary_generic(
+            summary_endpoint="workout",
+            data_class=WorkoutData,
+            data_class_datum=WorkoutDatum,
             start=start,
             end=end,
             next_token=next_token,
