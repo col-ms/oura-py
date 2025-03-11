@@ -29,6 +29,8 @@ from .models import (
     SleepDetailDatum,
     SleepTimeData,
     SleepTimeDatum,
+    VO2MaxData,
+    VO2MaxDatum,
 )
 
 
@@ -238,6 +240,21 @@ class OuraClient:
             summary_endpoint="sleep_time",
             data_class=SleepTimeData,
             data_class_datum=SleepTimeDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_vo2_max(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> VO2MaxData | VO2MaxDatum:
+        return self._get_summary_generic(
+            summary_endpoint="vO2_max",
+            data_class=VO2MaxData,
+            data_class_datum=VO2MaxDatum,
             start=start,
             end=end,
             next_token=next_token,

@@ -596,3 +596,27 @@ class SleepTimeData:
     ) -> None:
         self.data = [SleepTimeDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class VO2MaxDatum:
+    def __init__(
+        self,
+        id: str,
+        day: datetime,
+        timestamp: datetime,
+        vo2_max: int,
+    ) -> None:
+        self.id = id
+        self.day = day
+        self.timestamp = timestamp
+        self.vo2_max = vo2_max
+
+
+class VO2MaxData:
+    def __init__(
+        self,
+        data: List[VO2MaxDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [VO2MaxDatum(**d) for d in data] if data else []
+        self.next_token = next_token
