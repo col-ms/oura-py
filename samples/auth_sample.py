@@ -8,5 +8,5 @@ if __name__ == "__main__":
     load_dotenv()
     PAT = os.getenv("PERSONAL_ACCESS_TOKEN")
     myClient = OuraClient(personal_access_token=PAT)
-    summary = myClient.get_workouts(start="2025-03-01")
-    print(summary.data[0].day)
+    summary = myClient.get_ring_config()
+    print(summary.data[0].design)
