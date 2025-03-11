@@ -31,6 +31,8 @@ from .models import (
     SleepTimeDatum,
     VO2MaxData,
     VO2MaxDatum,
+    WorkoutData,
+    WorkoutDatum,
 )
 
 
@@ -255,6 +257,21 @@ class OuraClient:
             summary_endpoint="vO2_max",
             data_class=VO2MaxData,
             data_class_datum=VO2MaxDatum,
+            start=start,
+            end=end,
+            next_token=next_token,
+        )
+
+    def get_workouts(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+    ) -> WorkoutData | WorkoutDatum:
+        return self._get_summary_generic(
+            summary_endpoint="workout",
+            data_class=WorkoutData,
+            data_class_datum=WorkoutDatum,
             start=start,
             end=end,
             next_token=next_token,

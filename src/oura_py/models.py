@@ -620,3 +620,39 @@ class VO2MaxData:
     ) -> None:
         self.data = [VO2MaxDatum(**d) for d in data] if data else []
         self.next_token = next_token
+
+
+class WorkoutDatum:
+    def __init__(
+        self,
+        id: str,
+        activity: str,
+        calories: float,
+        day: datetime,
+        distance: float,
+        end_datetime: datetime,
+        intensity: str,
+        label: str,
+        source: str,
+        start_datetime: datetime,
+    ) -> None:
+        self.id = id
+        self.activity = activity
+        self.calories = calories
+        self.day = day
+        self.distance = distance
+        self.end_datetime = end_datetime
+        self.intensity = intensity
+        self.label = label
+        self.source = source
+        self.start_datetime = start_datetime
+
+
+class WorkoutData:
+    def __init__(
+        self,
+        data: List[WorkoutDatum],
+        next_token: str | None,
+    ) -> None:
+        self.data = [WorkoutDatum(**d) for d in data] if data else []
+        self.next_token = next_token
