@@ -52,125 +52,98 @@ class RingConfig:
             ]
 
 
+@dataclass
 class SleepSummaryContributors:
-    def __init__(
-        self,
-        deep_sleep: int,
-        efficiency: int,
-        latency: int,
-        rem_sleep: int,
-        restfulness: int,
-        timing: int,
-        total_sleep: int,
-    ) -> None:
-        self.deep_sleep = deep_sleep
-        self.efficiency = efficiency
-        self.latency = latency
-        self.rem_sleep = rem_sleep
-        self.restfulness = restfulness
-        self.timing = timing
-        self.total_sleep = total_sleep
+    deep_sleep: int
+    efficiency: int
+    latency: int
+    rem_sleep: int
+    restfulness: int
+    timing: int
+    total_sleep: int
 
 
+@dataclass
 class SleepSummaryDatum:
-    def __init__(
-        self,
-        id: str,
-        contributors: SleepSummaryContributors,
-        day: datetime,
-        score: int,
-        timestamp: datetime,
-    ) -> None:
-        self.id = id
-        self.contributors = SleepSummaryContributors(**contributors)
-        self.day = day
-        self.score = score
-        self.timestamp = timestamp
+    id: str
+    contributors: SleepSummaryContributors
+    day: datetime
+    score: int
+    timestamp: datetime
+
+    def __post_init__(self):
+        if isinstance(self.contributors, dict):
+            self.contributors = SleepSummaryContributors(**self.contributors)
 
 
+@dataclass
 class SleepSummary:
-    def __init__(
-        self, data: List[SleepSummaryDatum], next_token: str | None = None
-    ) -> None:
-        self.data = [SleepSummaryDatum(**d) for d in data] if data else []
-        self.next_token = next_token
+    next_token: Union[str, None]
+    data: List[SleepSummaryDatum] = field(default_factory=list)
+
+    def __post_init__(self):
+        if isinstance(self.data, list):
+            self.data = [
+                SleepSummaryDatum(**item) if isinstance(item, dict) else item
+                for item in self.data
+            ]
 
 
+@dataclass
 class ReadinessSummaryContributors:
-    def __init__(
-        self,
-        activity_balance: int,
-        body_temperature: int,
-        hrv_balance: int,
-        previous_day_activity: int,
-        previous_night: int,
-        recovery_index: int,
-        resting_heart_rate: int,
-        sleep_balance: int,
-    ) -> None:
-        self.acitvity_balance = activity_balance
-        self.body_temperature = body_temperature
-        self.hrv_balance = hrv_balance
-        self.previous_day_activity = previous_day_activity
-        self.previous_night = previous_night
-        self.recovery_index = recovery_index
-        self.resting_heart_rate = resting_heart_rate
-        self.sleep_balance = sleep_balance
+    activity_balance: int
+    body_temperature: int
+    hrv_balance: int
+    previous_day_activity: int
+    previous_night: int
+    recovery_index: int
+    resting_heart_rate: int
+    sleep_balance: int
 
 
+@dataclass
 class ReadinessSummaryDatum:
-    def __init__(
-        self,
-        id: str,
-        contributors: ReadinessSummaryContributors,
-        day: datetime,
-        score: int,
-        temperature_deviation: float,
-        temperature_trend_deviation: float,
-        timestamp: datetime,
-    ) -> None:
-        self.id = id
-        self.contributors = ReadinessSummaryContributors(**contributors)
-        self.day = day
-        self.score = score
-        self.temperature_deviation = temperature_deviation
-        self.temperature_trend_deviation = temperature_trend_deviation
-        self.timestamp = timestamp
+    id: str
+    contributors: ReadinessSummaryContributors
+    day: datetime
+    score: int
+    temperature_deviation: float
+    temperature_trend_deviation: float
+    timestamp: datetime
+
+    def __post_init__(self):
+        if isinstance(self.contributors, dict):
+            self.contributors = ReadinessSummaryContributors(**self.contributors)
 
 
+@dataclass
 class ReadinessSummary:
-    def __init__(
-        self, data: List[ReadinessSummaryDatum], next_token: str | None = None
-    ) -> None:
-        self.data = [ReadinessSummaryDatum(**d) for d in data] if data else []
-        self.next_token = next_token
+    next_token: Union[str, None]
+    data: List[ReadinessSummaryDatum] = field(default_factory=list)
+
+    def __post_init__(self):
+        if isinstance(self.data, list):
+            self.data = [
+                ReadinessSummaryDatum(**item) if isinstance(item, dict) else item
+                for item in self.data
+            ]
 
 
+@dataclass
 class ActivitySummaryContributors:
-    def __init__(
-        self,
-        meet_daily_targets: int,
-        move_every_hour: int,
-        recovery_time: int,
-        stay_active: int,
-        training_frequency: int,
-        training_volume: int,
-    ) -> None:
-        self.meet_daily_targets = meet_daily_targets
-        self.move_every_hour = move_every_hour
-        self.recovery_time = recovery_time
-        self.stay_active = stay_active
-        self.training_frequency = training_frequency
-        self.training_volume = training_volume
+    meet_daily_targets: int
+    move_every_hour: int
+    recovery_time: int
+    stay_active: int
+    training_frequency: int
+    training_volume: int
 
 
+@dataclass
 class ActivitySummaryMET:
-    def __init__(
-        self, interval: float, items: List[float], timestamp: datetime
-    ) -> None:
-        self.interval = interval
-        self.items = items
-        self.timestamp = timestamp
+    interval: float
+    items: List[float]
+    timestamp: datetime
 
 
 class ActivitySummaryDatum:
