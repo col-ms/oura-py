@@ -514,6 +514,7 @@ class WorkoutDatum:
     start_datetime: datetime
 
 
+@dataclass
 class WorkoutData:
     next_token: Union[str, None]
     data: List[WorkoutDatum] = field(default_factory=list)
