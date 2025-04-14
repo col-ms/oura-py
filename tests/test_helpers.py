@@ -18,7 +18,21 @@ def manager():
 def test_good_manager_init(manager):
     assert manager._url == "https://api.example.com/v1/data"
     assert manager._personal_access_token == "test_token"
-    assert manager._ssl_verify
+    assert manager._ssl_verify is True
+    assert manager._logger.name == "oura_py.helpers"
+
+
+def test_init_ssl_verify_false():
+    manager = RequestManager(
+        personal_access_token="test_token",
+        hostname="api.example.com",
+        ver="v1",
+        path="data",
+        ssl_verify=False,
+    )
+    assert manager._url == "https://api.example.com/v1/data"
+    assert manager._personal_access_token == "test_token"
+    assert manager._ssl_verify is False
     assert manager._logger.name == "oura_py.helpers"
 
 
@@ -72,3 +86,17 @@ def test_get_non_2xx_status(manager):
 
         with pytest.raises(OuraPyException, match="404: Not Found"):
             manager.get("test_endpoint")
+
+
+def test_good_post(manager):
+    with patch("oura_py.helpers.requests.request") as mock_request:
+        mock_response = Mock()
+        mock_response.status_code = 200
+        mock_response.reason = "OK"
+        mock_response.json.return_value = {"data": "test data"}
+        mock_request.return_value = mock_response
+
+        result = manager.post("test_endpoint", data={"key": "value"})
+        assert result.data == {"data": "test data"}
+        assert result.status_code == 200
+        assert result.message == "OK"
