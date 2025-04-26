@@ -1,6 +1,14 @@
 from typing import Dict, List, Union
 from datetime import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, fields
+
+
+def generic_type_checker(self):
+    """Generic type checker for dataclass fields."""
+    for f in fields(type(self)):
+        if not isinstance(getattr(self, f.name), f.type):
+            current_type = type(getattr(self, f.name))
+            raise TypeError(f"{f.name} must be {f.type}, got {current_type}")
 
 
 @dataclass
@@ -15,7 +23,10 @@ class Result:
 
     status_code: int
     message: str
-    data: List[Dict] = None
+    data: Dict
+
+    def __post_init__(self):
+        generic_type_checker(self)
 
 
 @dataclass
@@ -27,6 +38,9 @@ class PersonalInfo:
     biological_sex: str
     email: str
 
+    def __post_init__(self):
+        generic_type_checker(self)
+
 
 @dataclass
 class RingConfigData:
@@ -35,8 +49,11 @@ class RingConfigData:
     design: str
     firmware_version: str
     hardware_type: str
-    set_up_at: datetime
+    set_up_at: str
     size: int
+
+    def __post_init__(self):
+        generic_type_checker(self)
 
 
 @dataclass
