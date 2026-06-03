@@ -1,21 +1,26 @@
 import requests
 import logging
-from typing import Dict
+from typing import Dict, Optional
 from json import JSONDecodeError
 from urllib3.exceptions import InsecureRequestWarning
-from .exceptions import OuraPyException
-from .models import Result
+from oura_py.exceptions import OuraPyException
+from oura_py.models import Result
+from oura_py.auth.oauth_manager import OuraOAuth2Client
+from oura_py.auth.token_manager import TokenManager
 
 
 class RequestManager:
     def __init__(
         self,
-        personal_access_token: str,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: str,
         hostname: str,
         ver: str,
         path: str,
         ssl_verify: bool = True,
         logger: logging.Logger = None,
+        personal_access_token: Optional[str] = None,
     ) -> None:
         """HTTP request manager.
 
@@ -29,10 +34,16 @@ class RequestManager:
         """
         self._url = f"https://{hostname}/{ver}/{path}"
         self._personal_access_token = personal_access_token
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._redirect_uri = redirect_uri
         self._ssl_verify = ssl_verify
         self._logger = logger or logging.getLogger(__name__)
         if not ssl_verify:
             requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
+        auth_client = OuraOAuth2Client(client_id, client_secret, redirect_uri)
+        self.token_manager = TokenManager(auth_client)
 
     def get(self, endpoint: str, params: Dict = None) -> Result:
         """Sends a GET request to the specified endpoint with optional parameters.
@@ -60,6 +71,9 @@ class RequestManager:
         """
         return self._request(method="POST", endpoint=endpoint, params=params, data=data)
 
+    def _get_headers(self) -> dict:
+        return {"Authorization": f"Bearer {self.token_manager.get_valid_token()}"}
+
     def _request(
         self, method: str, endpoint: str, params: Dict = None, data: Dict = None
     ) -> Result:
@@ -79,7 +93,6 @@ class RequestManager:
             OuraPyException: If there is an error making the request or if the response contains bad JSON.
         """
         url = f"{self._url}/{endpoint}"
-        headers = {"Authorization": f"Bearer {self._personal_access_token}"}
         log_pre = f"method={method}, url={url}, params={params}"
         log_post = ", ".join(("success={}", "status_code={}", "message={}"))
         try:
@@ -87,7 +100,7 @@ class RequestManager:
             response = requests.request(
                 method=method,
                 url=url,
-                headers=headers,
+                headers=self._get_headers(),
                 params=params,
                 data=data,
                 verify=self._ssl_verify,

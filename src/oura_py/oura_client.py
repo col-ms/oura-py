@@ -39,29 +39,33 @@ from .models import (
 class OuraClient:
     def __init__(
         self,
-        personal_access_token: str,
+        client_id: str,
+        client_secret: str,
+        redirect_uri: str,
         hostname: str = "api.ouraring.com",
-        ver: str = "v2",
+        version: str = "v2",
         path: str = "usercollection",
         ssl_verify: bool = True,
         logger: logging.Logger = None,
     ):
         """Initializes the OuraClient instance.
 
-        Args:
-            personal_access_token (str): The personal access token for authenticating with the Oura API.
-            hostname (str, optional): The API hostname. Defaults to "api.ouraring.com".
-            ver (str, optional): The API version. Defaults to "v2".
-            path (str, optional): The API path. Defaults to "usercollection".
-            ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
-            logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
-        """
-        self.url = f"https://{hostname}/{ver}/{path}"
+        #     Args:
+        #         personal_access_token (str): The personal access token for authenticating with the Oura API.
+        #         hostname (str, optional): The API hostname. Defaults to "api.ouraring.com".
+        #         ver (str, optional): The API version. Defaults to "v2".
+        #         path (str, optional): The API path. Defaults to "usercollection".
+        #         ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
+        #         logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
+        #"""
+        self.url = f"https://{hostname}/{version}/{path}"
         self._logger = logger or logging.getLogger(__name__)
         self._manager = RequestManager(
-            personal_access_token=personal_access_token,
+            client_id=client_id,
+            client_secret=client_secret,
+            redirect_uri=redirect_uri,
             hostname=hostname,
-            ver=ver,
+            ver=version,
             path=path,
             ssl_verify=ssl_verify,
             logger=self._logger,

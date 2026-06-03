@@ -23,7 +23,7 @@ class OuraOAuth2Client:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
 
-    def get_authorization_url(self, scopes: list[str]) -> tuple[str, str]:
+    def get_authorization_url(self, scopes: list[str] = None) -> tuple[str, str]:
         state = secrets.token_urlsafe(16)
         params = {
             "response_type": "code",
