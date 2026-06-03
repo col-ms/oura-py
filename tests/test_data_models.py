@@ -55,3 +55,25 @@ def test_bad_ring_config(ring_config_data):
         match=f"color must be <class 'str'>, got {type(ring_config_data['color'])}",
     ):
         models.RingConfigData(**ring_config_data)
+
+
+def test_good_sleep_summary_contributor(sleep_summary_contributor_data):
+    sleep_summary_contributor = models.SleepSummaryContributors(
+        **sleep_summary_contributor_data
+    )
+    assert sleep_summary_contributor.deep_sleep == 120
+    assert sleep_summary_contributor.efficiency == 85
+    assert sleep_summary_contributor.latency == 15
+    assert sleep_summary_contributor.rem_sleep == 80
+    assert sleep_summary_contributor.restfulness == 5
+    assert sleep_summary_contributor.timing == 5
+    assert sleep_summary_contributor.total_sleep == 480
+
+
+def test_bad_sleep_summary_contributor(sleep_summary_contributor_data):
+    sleep_summary_contributor_data["deep_sleep"] = "120"
+    with pytest.raises(
+        TypeError,
+        match=f"deep_sleep must be <class 'int'>, got {type(sleep_summary_contributor_data['deep_sleep'])}",
+    ):
+        models.SleepSummaryContributors(**sleep_summary_contributor_data)

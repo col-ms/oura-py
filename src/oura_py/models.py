@@ -79,6 +79,9 @@ class SleepSummaryContributors:
     timing: int
     total_sleep: int
 
+    def __post_init__(self):
+        generic_type_checker(self)
+
 
 @dataclass
 class SleepSummaryDatum:

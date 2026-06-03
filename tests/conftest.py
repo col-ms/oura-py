@@ -42,3 +42,16 @@ def ring_config_data():
         "set_up_at": "2024-12-31T00:00:00+00:00",
         "size": 9,
     }
+
+
+@pytest.fixture()
+def sleep_summary_contributor_data():
+    return {
+        "deep_sleep": 120,
+        "efficiency": 85,
+        "latency": 15,
+        "rem_sleep": 80,
+        "restfulness": 5,
+        "timing": 5,
+        "total_sleep": 480,
+    }
