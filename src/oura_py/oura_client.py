@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 import logging
+from typing import Optional, Any
 from .helpers import RequestManager
 from .exceptions import OuraPyException
 from .models import (
@@ -36,12 +37,14 @@ from .models import (
 )
 
 
-class OuraClient:
+class OuraClient:  # TODO update docstring
     def __init__(
         self,
         client_id: str,
-        client_secret: str,
-        redirect_uri: str,
+        access_token: str,
+        client_secret: Optional[str] = None,
+        refresh_token: Optional[str] = None,
+        redirect_callback: Optional[Any] = None,
         hostname: str = "api.ouraring.com",
         version: str = "v2",
         path: str = "usercollection",
@@ -63,7 +66,6 @@ class OuraClient:
         self._manager = RequestManager(
             client_id=client_id,
             client_secret=client_secret,
-            redirect_uri=redirect_uri,
             hostname=hostname,
             ver=version,
             path=path,
