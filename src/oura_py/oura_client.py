@@ -18,6 +18,7 @@ from oura_py.models import (
     ResilienceSummary,
     RestModePeriodDatum,
     RestModePeriodSummary,
+    Result,
     RingConfig,
     SessionData,
     SessionDatum,
@@ -105,6 +106,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> SleepSummary | SleepSummaryDatum:
         return self._get_summary_generic(
             summary_endpoint="daily_sleep",
@@ -113,6 +116,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_readiness_summary(
@@ -120,6 +125,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> ReadinessSummary | ReadinessSummaryDatum:
         return self._get_summary_generic(
             summary_endpoint="daily_readiness",
@@ -128,6 +135,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_activity_summary(
@@ -135,6 +144,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> ActivitySummary | ActivitySummaryDatum:
         return self._get_summary_generic(
             summary_endpoint="daily_activity",
@@ -143,28 +154,35 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_heartrate_summary(
         self,
-        start: str | None = None,
-        end: str | None = None,
+        start_datetime: str | None = None,
+        end_datetime: str | None = None,
         next_token: str | None = None,
+        latest: bool | None = None,
+        fields: str | None = None,
     ) -> HeartRateSummary | HeartRateDatum:
-        return self._get_summary_generic(
-            summary_endpoint="heartrate",
-            data_class=HeartRateSummary,
-            data_class_datum=HeartRateDatum,
-            start=start,
-            end=end,
+        params = self._compact_params(
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
             next_token=next_token,
+            latest=latest,
+            fields=fields,
         )
+        result = self._manager.get("heartrate", params=params)
+        return HeartRateSummary(**result.data)
 
     def get_stress_summary(
         self,
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> StressSummary | StressDatum:
         return self._get_summary_generic(
             summary_endpoint="daily_stress",
@@ -173,6 +191,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_resilience_summary(
@@ -180,6 +200,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> ResilienceSummary | ResilienceDatum:
         return self._get_summary_generic(
             summary_endpoint="daily_resilience",
@@ -188,6 +210,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_spo2_summary(
@@ -195,6 +219,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> Spo2Summary | Spo2Datum:
         return self._get_summary_generic(
             summary_endpoint="daily_spo2",
@@ -203,6 +229,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_tags_summary(
@@ -210,6 +238,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> TagSummary | TagDatum:
         return self._get_summary_generic(
             summary_endpoint="enhanced_tag",
@@ -218,6 +248,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_rest_mode_periods(
@@ -225,6 +257,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> RestModePeriodSummary | RestModePeriodDatum:
         return self._get_summary_generic(
             summary_endpoint="rest_mode_period",
@@ -233,6 +267,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_session_data(
@@ -240,6 +276,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> SessionData | SessionDatum:
         return self._get_summary_generic(
             summary_endpoint="session",
@@ -248,6 +286,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_sleep_detail(
@@ -255,6 +295,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> SleepDetailData | SleepDetailDatum:
         return self._get_summary_generic(
             summary_endpoint="sleep",
@@ -263,6 +305,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_sleep_times(
@@ -270,6 +314,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> SleepTimeData | SleepTimeDatum:
         return self._get_summary_generic(
             summary_endpoint="sleep_time",
@@ -278,6 +324,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_vo2_max(
@@ -285,6 +333,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> VO2MaxData | VO2MaxDatum:
         return self._get_summary_generic(
             summary_endpoint="vO2_max",
@@ -293,6 +343,8 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_workouts(
@@ -300,6 +352,8 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ) -> WorkoutData | WorkoutDatum:
         return self._get_summary_generic(
             summary_endpoint="workout",
@@ -308,22 +362,124 @@ class OuraClient:
             start=start,
             end=end,
             next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
+
+    def get_daily_cardiovascular_age(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
+    ) -> Result:
+        """Get daily cardiovascular-age records or one record by ID."""
+        return self._get_raw_collection(
+            "daily_cardiovascular_age", start, end, next_token, document_id, fields
+        )
+
+    def get_ring_battery_level(
+        self,
+        start_datetime: str | None = None,
+        end_datetime: str | None = None,
+        next_token: str | None = None,
+        latest: bool | None = None,
+        fields: str | None = None,
+    ) -> Result:
+        """Get ring battery-level time-series data."""
+        params = self._compact_params(
+            start_datetime=start_datetime,
+            end_datetime=end_datetime,
+            next_token=next_token,
+            latest=latest,
+            fields=fields,
+        )
+        return self._manager.get("ring_battery_level", params=params)
+
+    def get_tag(
+        self,
+        start: str | None = None,
+        end: str | None = None,
+        next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
+    ) -> Result:
+        """Get basic tag records or one record by ID."""
+        return self._get_raw_collection(
+            "tag", start, end, next_token, document_id, fields
+        )
+
+    def get_webhook_subscriptions(self) -> Result:
+        """List the application's webhook subscriptions."""
+        return self._manager.get("../webhook/subscription")
+
+    def create_webhook_subscription(self, data: dict) -> Result:
+        """Create a webhook subscription from an OpenAPI request payload."""
+        return self._manager.post("../webhook/subscription", data=data)
+
+    def get_webhook_subscription(self, subscription_id: str) -> Result:
+        """Get one webhook subscription by ID."""
+        return self._manager.get(f"../webhook/subscription/{subscription_id}")
+
+    def update_webhook_subscription(self, subscription_id: str, data: dict) -> Result:
+        """Update a webhook subscription."""
+        return self._manager.put(
+            f"../webhook/subscription/{subscription_id}", data=data
+        )
+
+    def delete_webhook_subscription(self, subscription_id: str) -> Result:
+        """Delete a webhook subscription."""
+        return self._manager.delete(f"../webhook/subscription/{subscription_id}")
+
+    def renew_webhook_subscription(self, subscription_id: str) -> Result:
+        """Renew a webhook subscription."""
+        return self._manager.put(f"../webhook/subscription/renew/{subscription_id}")
 
     def get_personal_info(self) -> PersonalInfo:
         result = self._manager.get("personal_info")
         data = PersonalInfo(**result.data)
         return data
 
-    def get_ring_config(self, document_id: str | None = None) -> RingConfig:
+    def get_ring_config(
+        self,
+        document_id: str | None = None,
+        next_token: str | None = None,
+        fields: str | None = None,
+    ) -> RingConfig:
+        if document_id and next_token:
+            raise ValueError("document_id and next_token cannot be used together")
         endpoint = (
             "ring_configuration"
             if document_id is None
             else f"ring_configuration/{document_id}"
         )
-        result = self._manager.get(endpoint=endpoint)
+        params = self._compact_params(next_token=next_token, fields=fields)
+        result = self._manager.get(endpoint=endpoint, params=params)
         data = RingConfig(**result.data)
         return data
+
+    def _get_raw_collection(
+        self,
+        endpoint: str,
+        start: str | None,
+        end: str | None,
+        next_token: str | None,
+        document_id: str | None,
+        fields: str | None,
+    ) -> Result:
+        if document_id and next_token:
+            raise ValueError("document_id and next_token cannot be used together")
+        if document_id:
+            return self._manager.get(f"{endpoint}/{document_id}")
+        start_date, end_date = self._prep_dates(start, end)
+        params = self._compact_params(
+            start_date=start_date,
+            end_date=end_date,
+            next_token=next_token,
+            fields=fields,
+        )
+        return self._manager.get(endpoint, params=params)
 
     def _get_summary_generic(
         self,
@@ -333,16 +489,25 @@ class OuraClient:
         start: str | None = None,
         end: str | None = None,
         next_token: str | None = None,
+        document_id: str | None = None,
+        fields: str | None = None,
     ):
-        if next_token:
-            self._logger.debug(msg=f"next_token={next_token}")
-            result = self._manager.get(f"{summary_endpoint}/{next_token}")
+        if document_id and next_token:
+            raise ValueError("document_id and next_token cannot be used together")
+        if document_id:
+            result = self._manager.get(f"{summary_endpoint}/{document_id}")
             data = data_class_datum(**result.data)
             return data
         start_date, end_date = self._prep_dates(start, end)
+        params = self._compact_params(
+            start_date=start_date,
+            end_date=end_date,
+            next_token=next_token,
+            fields=fields,
+        )
         result = self._manager.get(
             f"{summary_endpoint}",
-            params={"start_date": start_date, "end_date": end_date},
+            params=params,
         )
         data = data_class(**result.data)
         return data
@@ -365,3 +530,8 @@ class OuraClient:
             self._logger.error(msg=log_msg)
             raise OuraPyException("Start date must be before end date.")
         return str(start), str(end)
+
+    @staticmethod
+    def _compact_params(**params: object) -> dict:
+        """Remove unset optional query parameters before sending a request."""
+        return {key: value for key, value in params.items() if value is not None}

@@ -32,6 +32,7 @@ class RequestManager:
             logger: Optional logger used for request diagnostics.
         """
         self._url = f"{BASE_URL}/{VERSION}/{PATH}"
+        self._version_url = f"{BASE_URL}/{VERSION}"
         self._logger = logger or logging.getLogger(__name__)
         self._ssl_verify = ssl_verify
         if not ssl_verify:
@@ -81,6 +82,14 @@ class RequestManager:
         """
         return self._request(method="POST", endpoint=endpoint, params=params, data=data)
 
+    def put(self, endpoint: str, data: dict | None = None) -> Result:
+        """Send a JSON PUT request to an API endpoint."""
+        return self._request(method="PUT", endpoint=endpoint, data=data)
+
+    def delete(self, endpoint: str) -> Result:
+        """Send a DELETE request to an API endpoint."""
+        return self._request(method="DELETE", endpoint=endpoint)
+
     def _request(
         self,
         method: str,
@@ -103,7 +112,11 @@ class RequestManager:
         Raises:
             OuraPyException: If there is an error making the request or if the response contains bad JSON.
         """
-        url = f"{self._url}/{endpoint}"
+        url = (
+            f"{self._version_url}/{endpoint[3:]}"
+            if endpoint.startswith("../")
+            else f"{self._url}/{endpoint}"
+        )
         log_pre = f"method={method}, url={url}, params={params}"
         log_post = "success={}, status_code={}, message={}"
         try:
@@ -112,17 +125,20 @@ class RequestManager:
                 method=method,
                 url=url,
                 params=params,
-                data=data,
+                json=data if method in {"POST", "PUT", "PATCH"} else None,
                 verify=self._ssl_verify,
             )
         except requests.exceptions.RequestException as e:
             self._logger.error(msg=str(e))
             raise OuraPyException("Error making request") from e
-        try:
-            data_out = response.json()
-        except (ValueError, JSONDecodeError) as e:
-            self._logger.error(msg=log_post.format(False, None, e))
-            raise OuraPyException("Bad JSON in response") from e
+        if response.status_code == 204 or not response.content:
+            data_out = {}
+        else:
+            try:
+                data_out = response.json()
+            except (ValueError, JSONDecodeError) as e:
+                self._logger.error(msg=log_post.format(False, None, e))
+                raise OuraPyException("Bad JSON in response") from e
         req_success = 299 >= response.status_code >= 200
         log_line = log_post.format(req_success, response.status_code, response.reason)
         if req_success:
