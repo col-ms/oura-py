@@ -53,6 +53,7 @@ class OuraClient:  # TODO update docstring
         token_store: TokenStore | None = None,
         interactive: bool = False,
         token_path: str | None = None,
+        redirect_uri: str | None = None,
         ssl_verify: bool = True,
         logger: logging.Logger | None = None,
     ):
@@ -75,7 +76,9 @@ class OuraClient:  # TODO update docstring
                     )
                 store = token_store or JsonTokenStore(token_path or ".oura_tokens.json")
                 token_manager = TokenManager(
-                    OuraOAuth2Client(client_id, client_secret), store=store
+                    OuraOAuth2Client(client_id, client_secret),
+                    store=store,
+                    redirect_uri=redirect_uri,
                 )
             token = token_manager.get_valid_token(interactive=interactive)
         self._manager = RequestManager(

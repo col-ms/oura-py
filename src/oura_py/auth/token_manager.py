@@ -51,12 +51,14 @@ class TokenManager:
         client: OuraOAuth2Client,
         store: TokenStore | None = None,
         host: str = "localhost",
-        port: int = 0,
+        port: int = 8080,
+        redirect_uri: str | None = None,
     ):
         self.client = client
         self.store = store or JsonTokenStore()
         self.host = host
         self.port = port
+        self.redirect_uri = redirect_uri
 
     def get_valid_token(self, interactive: bool = False) -> dict:
         """Return a complete valid OAuth token, optionally authorizing in a browser."""
@@ -78,8 +80,20 @@ class TokenManager:
         return token
 
     def _authorize(self) -> dict:
-        server = HTTPServer((self.host, self.port), _CallbackHandler)
-        redirect_uri = f"http://{self.host}:{server.server_port}/callback"
+        if self.redirect_uri:
+            parsed_redirect = urlparse(self.redirect_uri)
+            if parsed_redirect.scheme != "http" or not parsed_redirect.hostname:
+                raise ValueError("redirect_uri must be an HTTP URL with a hostname")
+            bind_host = parsed_redirect.hostname
+            bind_port = parsed_redirect.port or 80
+        else:
+            bind_host = self.host
+            bind_port = self.port
+
+        server = HTTPServer((bind_host, bind_port), _CallbackHandler)
+        redirect_uri = self.redirect_uri or (
+            f"http://{bind_host}:{server.server_port}/callback"
+        )
         url, state = self.client.get_authorization_url(redirect_uri=redirect_uri)
         print(f"Opening browser for Oura authorization...\n{url}\n")
         webbrowser.open(url)

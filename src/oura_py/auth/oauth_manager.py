@@ -39,9 +39,13 @@ class OuraOAuth2Client:
     def refresh_access_token(self, refresh_token: str) -> dict:
         if not refresh_token:
             raise ValueError("refresh_token is required")
-        return self.session.refresh_token(
+        token = self.session.refresh_token(
             token_url=TOKEN_URL,
             refresh_token=refresh_token,
             client_id=self.client_id,
             client_secret=self.client_secret,
         )
+        # OAuth providers are allowed to omit refresh_token when it has not
+        # rotated. Keep the existing credential in that case.
+        token.setdefault("refresh_token", refresh_token)
+        return token
