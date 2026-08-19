@@ -95,3 +95,27 @@ client = OuraClient(
 
 `JsonTokenStore` is intended for local development and command-line scripts;
 use a keyring or secret manager for shared or production environments.
+
+### Webhooks
+
+See `examples/webhook_example.py` for a complete subscription and receiver
+example. The script uses ngrok's official Python SDK to expose the local receiver and derives the
+public callback URL automatically. An ngrok authtoken may be required; set
+`NGROK_AUTHTOKEN` if your ngrok account requires one.
+
+The example expects these environment variables:
+
+```text
+CLIENT_ID=your-oura-client-id
+CLIENT_SECRET=your-oura-client-secret
+WEBHOOK_VERIFICATION_TOKEN=choose-a-secret-value
+NGROK_AUTHTOKEN=your-ngrok-authtoken
+```
+
+The example uses port `8000`, subscribes to `daily_sleep` updates, and uses
+the generated ngrok URL automatically.
+
+It handles Oura's verification challenge, validates the
+`x-oura-signature` HMAC, acknowledges the notification quickly, and prints
+the event metadata. Production applications should enqueue the event and
+fetch the changed resource asynchronously using the event's `object_id`.

@@ -33,6 +33,8 @@ class RequestManager:
         """
         self._url = f"{BASE_URL}/{VERSION}/{PATH}"
         self._version_url = f"{BASE_URL}/{VERSION}"
+        self._client_id = client_id
+        self._client_secret = client_secret
         self._logger = logger or logging.getLogger(__name__)
         self._ssl_verify = ssl_verify
         if not ssl_verify:
@@ -90,12 +92,45 @@ class RequestManager:
         """Send a DELETE request to an API endpoint."""
         return self._request(method="DELETE", endpoint=endpoint)
 
+    def webhook_get(self, endpoint: str) -> Result:
+        """Send a webhook-management GET using client credential headers."""
+        return self._request(
+            method="GET", endpoint=endpoint, headers=self._webhook_headers()
+        )
+
+    def webhook_post(self, endpoint: str, data: dict) -> Result:
+        """Send a webhook-management POST using client credential headers."""
+        return self._request(
+            method="POST", endpoint=endpoint, data=data, headers=self._webhook_headers()
+        )
+
+    def webhook_put(self, endpoint: str, data: dict | None = None) -> Result:
+        """Send a webhook-management PUT using client credential headers."""
+        return self._request(
+            method="PUT", endpoint=endpoint, data=data, headers=self._webhook_headers()
+        )
+
+    def webhook_delete(self, endpoint: str) -> Result:
+        """Send a webhook-management DELETE using client credential headers."""
+        return self._request(
+            method="DELETE", endpoint=endpoint, headers=self._webhook_headers()
+        )
+
+    def _webhook_headers(self) -> dict[str, str]:
+        if not self._client_secret:
+            raise ValueError("client_secret is required for webhook operations")
+        return {
+            "x-client-id": self._client_id,
+            "x-client-secret": self._client_secret,
+        }
+
     def _request(
         self,
         method: str,
         endpoint: str,
         params: dict | None = None,
         data: dict | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Result:
         """
         Makes an HTTP request to the specified endpoint with the given method, parameters, and data.
@@ -126,6 +161,7 @@ class RequestManager:
                 url=url,
                 params=params,
                 json=data if method in {"POST", "PUT", "PATCH"} else None,
+                headers=headers,
                 verify=self._ssl_verify,
             )
         except requests.exceptions.RequestException as e:
@@ -139,6 +175,11 @@ class RequestManager:
             except (ValueError, JSONDecodeError) as e:
                 self._logger.error(msg=log_post.format(False, None, e))
                 raise OuraPyException("Bad JSON in response") from e
+        # Result currently models payloads as dictionaries. Some Oura
+        # endpoints, including webhook subscription listing, return a
+        # top-level JSON array, so preserve that payload under ``data``.
+        if not isinstance(data_out, dict):
+            data_out = {"data": data_out}
         req_success = 299 >= response.status_code >= 200
         log_line = log_post.format(req_success, response.status_code, response.reason)
         if req_success:
@@ -147,4 +188,10 @@ class RequestManager:
                 status_code=response.status_code, message=response.reason, data=data_out
             )
         self._logger.error(msg=log_line)
-        raise OuraPyException(f"{response.status_code}: {response.reason}")
+        detail = data_out.get("detail") if isinstance(data_out, dict) else None
+        error_message = f"{response.status_code}: {response.reason}"
+        if detail:
+            error_message += f" - {detail}"
+        elif data_out:
+            error_message += f" - {data_out}"
+        raise OuraPyException(error_message)

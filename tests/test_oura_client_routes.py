@@ -80,16 +80,16 @@ def test_heartrate_uses_datetime_parameters():
 
 def test_webhook_routes_use_version_root():
     client = make_client()
-    client._manager.get = Mock(
+    client._manager.webhook_get = Mock(
         return_value=Result(status_code=200, message="OK", data={})
     )
-    client._manager.post = Mock(
+    client._manager.webhook_post = Mock(
         return_value=Result(status_code=201, message="Created", data={})
     )
-    client._manager.put = Mock(
+    client._manager.webhook_put = Mock(
         return_value=Result(status_code=200, message="OK", data={})
     )
-    client._manager.delete = Mock(
+    client._manager.webhook_delete = Mock(
         return_value=Result(status_code=204, message="No Content", data={})
     )
 
@@ -102,13 +102,15 @@ def test_webhook_routes_use_version_root():
     client.renew_webhook_subscription("sub-1")
     client.delete_webhook_subscription("sub-1")
 
-    client._manager.get.assert_any_call("../webhook/subscription")
-    client._manager.post.assert_called_once_with(
+    client._manager.webhook_get.assert_any_call("../webhook/subscription")
+    client._manager.webhook_post.assert_called_once_with(
         "../webhook/subscription", data={"callback_url": "https://example.test"}
     )
-    client._manager.put.assert_any_call(
+    client._manager.webhook_put.assert_any_call(
         "../webhook/subscription/sub-1",
         data={"callback_url": "https://example.test"},
     )
-    client._manager.put.assert_any_call("../webhook/subscription/renew/sub-1")
-    client._manager.delete.assert_called_once_with("../webhook/subscription/sub-1")
+    client._manager.webhook_put.assert_any_call("../webhook/subscription/renew/sub-1")
+    client._manager.webhook_delete.assert_called_once_with(
+        "../webhook/subscription/sub-1"
+    )

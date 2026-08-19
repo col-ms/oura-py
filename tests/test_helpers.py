@@ -86,3 +86,13 @@ def test_good_post(manager):
 
         result = manager.post("test_endpoint", data={"key": "value"})
         assert result.data == {"data": "test data"}
+
+
+def test_list_response_is_wrapped_for_result_model(manager):
+    with patch.object(manager._session, "request") as mock_request:
+        mock_response = Mock(status_code=200, reason="OK")
+        mock_response.json.return_value = [{"id": "subscription-1"}]
+        mock_request.return_value = mock_response
+
+        result = manager.get("test_endpoint")
+        assert result.data == {"data": [{"id": "subscription-1"}]}

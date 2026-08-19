@@ -4,6 +4,7 @@ from collections.abc import Callable
 
 from oura_py.auth.oauth_manager import OuraOAuth2Client
 from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
+from oura_py.constants import WebhookDataType
 from oura_py.exceptions import OuraPyException
 from oura_py.helpers import RequestManager
 from oura_py.models import (
@@ -412,29 +413,36 @@ class OuraClient:
 
     def get_webhook_subscriptions(self) -> Result:
         """List the application's webhook subscriptions."""
-        return self._manager.get("../webhook/subscription")
+        return self._manager.webhook_get("../webhook/subscription")
 
     def create_webhook_subscription(self, data: dict) -> Result:
         """Create a webhook subscription from an OpenAPI request payload."""
-        return self._manager.post("../webhook/subscription", data=data)
+        payload = dict(data)
+        if isinstance(payload.get("data_type"), WebhookDataType):
+            payload["data_type"] = payload["data_type"].value
+        return self._manager.webhook_post("../webhook/subscription", data=payload)
 
     def get_webhook_subscription(self, subscription_id: str) -> Result:
         """Get one webhook subscription by ID."""
-        return self._manager.get(f"../webhook/subscription/{subscription_id}")
+        return self._manager.webhook_get(f"../webhook/subscription/{subscription_id}")
 
     def update_webhook_subscription(self, subscription_id: str, data: dict) -> Result:
         """Update a webhook subscription."""
-        return self._manager.put(
+        return self._manager.webhook_put(
             f"../webhook/subscription/{subscription_id}", data=data
         )
 
     def delete_webhook_subscription(self, subscription_id: str) -> Result:
         """Delete a webhook subscription."""
-        return self._manager.delete(f"../webhook/subscription/{subscription_id}")
+        return self._manager.webhook_delete(
+            f"../webhook/subscription/{subscription_id}"
+        )
 
     def renew_webhook_subscription(self, subscription_id: str) -> Result:
         """Renew a webhook subscription."""
-        return self._manager.put(f"../webhook/subscription/renew/{subscription_id}")
+        return self._manager.webhook_put(
+            f"../webhook/subscription/renew/{subscription_id}"
+        )
 
     def get_personal_info(self) -> PersonalInfo:
         result = self._manager.get("personal_info")

@@ -1,3 +1,5 @@
+from enum import Enum
+
 BASE_URL = "https://api.ouraring.com"
 VERSION = "v2"
 PATH = "usercollection"
@@ -13,3 +15,29 @@ SCOPE = (
     "session",
     "spo2",
 )
+
+
+class WebhookDataType(str, Enum):
+    """
+    Data types accepted by Oura webhook subscriptions.
+
+    Docs: https://cloud.ouraring.com/v2/docs#operation/create_webhook_subscription_v2_webhook_subscription_post
+    """
+
+    TAG = "tag"
+    ENHANCED_TAG = "enhanced_tag"
+    WORKOUT = "workout"
+    SESSION = "session"
+    SLEEP = "sleep"
+    DAILY_SLEEP = "daily_sleep"
+    DAILY_READINESS = "daily_readiness"
+    DAILY_ACTIVITY = "daily_activity"
+    DAILY_SPO2 = "daily_spo2"
+    SLEEP_TIME = "sleep_time"
+    REST_MODE_PERIOD = "rest_mode_period"
+    RING_CONFIGURATION = "ring_configuration"
+    DAILY_STRESS = "daily_stress"
+    DAILY_CARDIOVASCULAR_AGE = "daily_cardiovascular_age"
+    DAILY_RESILIENCE = "daily_resilience"
+    VO2_MAX = "vo2_max"
+    MEAL = "meal"
