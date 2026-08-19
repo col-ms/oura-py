@@ -1,6 +1,5 @@
-from typing import Dict, List, Union
-from datetime import datetime
 from dataclasses import dataclass, field, fields
+from datetime import datetime
 
 
 def generic_type_checker(self):
@@ -23,7 +22,7 @@ class Result:
 
     status_code: int
     message: str
-    data: Dict
+    data: dict
 
     def __post_init__(self):
         generic_type_checker(self)
@@ -58,8 +57,8 @@ class RingConfigData:
 
 @dataclass
 class RingConfig:
-    next_token: Union[str, None]
-    data: List[RingConfigData] = field(default_factory=list)
+    next_token: str | None
+    data: list[RingConfigData] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -98,8 +97,8 @@ class SleepSummaryDatum:
 
 @dataclass
 class SleepSummary:
-    next_token: Union[str, None]
-    data: List[SleepSummaryDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[SleepSummaryDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -138,8 +137,8 @@ class ReadinessSummaryDatum:
 
 @dataclass
 class ReadinessSummary:
-    next_token: Union[str, None]
-    data: List[ReadinessSummaryDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[ReadinessSummaryDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -162,7 +161,7 @@ class ActivitySummaryContributors:
 @dataclass
 class ActivitySummaryMET:
     interval: float
-    items: List[float]
+    items: list[float]
     timestamp: datetime
 
 
@@ -204,8 +203,8 @@ class ActivitySummaryDatum:
 
 @dataclass
 class ActivitySummary:
-    next_token: Union[str, None]
-    data: List[ActivitySummaryDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[ActivitySummaryDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -224,8 +223,8 @@ class HeartRateDatum:
 
 @dataclass
 class HeartRateSummary:
-    next_token: Union[str, None]
-    data: List[HeartRateDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[HeartRateDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -246,8 +245,8 @@ class StressDatum:
 
 @dataclass
 class StressSummary:
-    next_token: Union[str, None]
-    data: List[StressDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[StressDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -278,8 +277,8 @@ class ResilienceDatum:
 
 @dataclass
 class ResilienceSummary:
-    next_token: Union[str, None]
-    data: List[ResilienceDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[ResilienceDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -299,8 +298,8 @@ class Spo2Datum:
 
 @dataclass
 class Spo2Summary:
-    next_token: Union[str, None]
-    data: List[Spo2Datum] = field(default_factory=list)
+    next_token: str | None
+    data: list[Spo2Datum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -315,7 +314,7 @@ class TagDatum:
     id: str
     tag_type_code: str
     start_time: datetime
-    end_time: Union[datetime, None]
+    end_time: datetime | None
     start_day: datetime
     end_day: datetime
     comment: str
@@ -324,8 +323,8 @@ class TagDatum:
 
 @dataclass
 class TagSummary:
-    next_token: Union[str, None]
-    data: List[TagDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[TagDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -337,7 +336,7 @@ class TagSummary:
 
 @dataclass
 class RestModeEpisodes:
-    tags: List[str]
+    tags: list[str]
     timestamp: datetime
 
 
@@ -357,8 +356,8 @@ class RestModePeriodDatum:
 
 @dataclass
 class RestModePeriodSummary:
-    next_token: Union[str, None]
-    data: List[RestModePeriodDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[RestModePeriodDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -371,7 +370,7 @@ class RestModePeriodSummary:
 @dataclass
 class SessionMeasureInfo:
     interval: int
-    items: List[Union[float, None]]
+    items: list[float | None]
     timestamp: datetime
 
 
@@ -400,8 +399,8 @@ class SessionDatum:
 
 @dataclass
 class SessionData:
-    next_token: Union[str, None]
-    data: List[SessionDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[SessionDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -455,8 +454,8 @@ class SleepDetailDatum:
 
 @dataclass
 class SleepDetailData:
-    next_token: Union[str, None]
-    data: List[SleepDetailDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[SleepDetailDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -477,7 +476,7 @@ class SleepTimeWindow:
 class SleepTimeDatum:
     id: str
     day: str
-    optimal_bedtime: Union[SleepTimeWindow, None]
+    optimal_bedtime: SleepTimeWindow | None
     recommendation: str
     status: str
 
@@ -488,8 +487,8 @@ class SleepTimeDatum:
 
 @dataclass
 class SleepTimeData:
-    next_token: Union[str, None]
-    data: List[SleepTimeDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[SleepTimeDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -509,8 +508,8 @@ class VO2MaxDatum:
 
 @dataclass
 class VO2MaxData:
-    next_token: Union[str, None]
-    data: List[VO2MaxDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[VO2MaxDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):
@@ -536,8 +535,8 @@ class WorkoutDatum:
 
 @dataclass
 class WorkoutData:
-    next_token: Union[str, None]
-    data: List[WorkoutDatum] = field(default_factory=list)
+    next_token: str | None
+    data: list[WorkoutDatum] = field(default_factory=list)
 
     def __post_init__(self):
         if isinstance(self.data, list):

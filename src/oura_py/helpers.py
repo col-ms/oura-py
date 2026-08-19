@@ -1,8 +1,12 @@
-import requests
 import logging
-from typing import Dict, Optional
+from collections.abc import Callable
 from json import JSONDecodeError
+
+import requests
+from requests_oauthlib import OAuth2Session
 from urllib3.exceptions import InsecureRequestWarning
+
+from oura_py.constants import BASE_URL, PATH, TOKEN_URL, VERSION
 from oura_py.exceptions import OuraPyException
 from oura_py.models import Result
 
@@ -11,12 +15,13 @@ class RequestManager:
     def __init__(
         self,
         client_id: str,
-        hostname: str,
-        ver: str,
-        path: str,
+        access_token: str | None = None,
+        token: dict | None = None,
+        client_secret: str | None = None,
+        refresh_token: str | None = None,
+        refresh_callback: Callable | None = None,
         ssl_verify: bool = True,
-        logger: logging.Logger = None,
-        client_secret: Optional[str] = None,
+        logger: logging.Logger | None = None,
     ) -> None:
         """HTTP request manager.
 
@@ -28,15 +33,34 @@ class RequestManager:
             ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
             logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
         """
-        self._url = f"https://{hostname}/{ver}/{path}"
+        self._url = f"{BASE_URL}/{VERSION}/{PATH}"
         self._client_id = client_id
         self._client_secret = client_secret
-        self._ssl_verify = ssl_verify
+        self._refresh_callback = refresh_callback
         self._logger = logger or logging.getLogger(__name__)
+        self._ssl_verify = ssl_verify
         if not ssl_verify:
             requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
-    def get(self, endpoint: str, params: Dict = None) -> Result:
+        token = dict(token or {})
+        if access_token:
+            token["access_token"] = access_token
+        if refresh_token:
+            token["refresh_token"] = refresh_token
+        token.setdefault("token_type", "Bearer")
+
+        self._session = OAuth2Session(
+            client_id=client_id,
+            token=token,
+            auto_refresh_url=TOKEN_URL,
+            auto_refresh_kwargs={
+                "client_id": client_id,
+                "client_secret": client_secret,
+            },
+            token_updater=refresh_callback,
+        )
+
+    def get(self, endpoint: str, params: dict | None = None) -> Result:
         """Sends a GET request to the specified endpoint with optional parameters.
 
         Args:
@@ -48,7 +72,9 @@ class RequestManager:
         """
         return self._request(method="GET", endpoint=endpoint, params=params)
 
-    def post(self, endpoint: str, params: Dict = None, data: Dict = None) -> Result:
+    def post(
+        self, endpoint: str, params: dict | None = None, data: dict | None = None
+    ) -> Result:
         """
         Sends a POST request to the specified endpoint with the given parameters and data.
 
@@ -66,9 +92,8 @@ class RequestManager:
         self,
         method: str,
         endpoint: str,
-        params: Dict = None,
-        data: Dict = None,
-        headers: dict = None,
+        params: dict | None = None,
+        data: dict | None = None,
     ) -> Result:
         """
         Makes an HTTP request to the specified endpoint with the given method, parameters, and data.
@@ -87,13 +112,12 @@ class RequestManager:
         """
         url = f"{self._url}/{endpoint}"
         log_pre = f"method={method}, url={url}, params={params}"
-        log_post = ", ".join(("success={}", "status_code={}", "message={}"))
+        log_post = "success={}, status_code={}, message={}"
         try:
             self._logger.debug(msg=log_pre)
-            response = requests.request(
+            response = self._session.request(
                 method=method,
                 url=url,
-                headers=headers,
                 params=params,
                 data=data,
                 verify=self._ssl_verify,

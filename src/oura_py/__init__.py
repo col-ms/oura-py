@@ -1,2 +1,3 @@
-def hello() -> str:
-    return "Hello from oura-py!"
+from oura_py.oura_client import OuraClient
+
+__all__ = ["OuraClient"]

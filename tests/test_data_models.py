@@ -1,5 +1,6 @@
 import pytest
-import oura_py.models as models
+
+from oura_py import models
 
 
 def test_good_result(result_data):

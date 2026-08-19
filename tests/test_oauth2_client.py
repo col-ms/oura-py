@@ -1,7 +1,9 @@
-import pytest
-from oura_py.auth.oauth_manager import OuraOAuth2Client
 from urllib.parse import quote
-from tests.constants import CLIENT_ID, CLIENT_SECRET, AUTHORIZE_BASE_URL
+
+import pytest
+
+from oura_py.auth.oauth_manager import OuraOAuth2Client
+from tests.constants import AUTHORIZE_BASE_URL, CLIENT_ID, CLIENT_SECRET
 
 
 @pytest.fixture
