@@ -9,7 +9,7 @@ from oura_py.helpers import RequestManager
 
 @pytest.fixture
 def manager():
-    return RequestManager(client_id="client_id", access_token="test_token")
+    return RequestManager(client_id="client_id", token={"access_token": "test_token"})
 
 
 def test_good_manager_init(manager):
@@ -22,7 +22,9 @@ def test_good_manager_init(manager):
 
 def test_init_ssl_verify_false():
     manager = RequestManager(
-        client_id="client_id", access_token="test_token", ssl_verify=False
+        client_id="client_id",
+        token={"access_token": "test_token"},
+        ssl_verify=False,
     )
     assert manager._ssl_verify is False
 

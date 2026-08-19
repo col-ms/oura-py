@@ -15,38 +15,31 @@ class RequestManager:
     def __init__(
         self,
         client_id: str,
-        access_token: str | None = None,
-        token: dict | None = None,
+        token: dict,
         client_secret: str | None = None,
-        refresh_token: str | None = None,
-        refresh_callback: Callable | None = None,
+        token_updater: Callable | None = None,
         ssl_verify: bool = True,
         logger: logging.Logger | None = None,
     ) -> None:
-        """HTTP request manager.
+        """Manage authenticated HTTP requests to the Oura API.
 
         Args:
-            personal_access_token (str): The personal access token for authenticating with the Oura API.
-            hostname (str): The API hostname.
-            ver (str): The API version.
-            path (str): The API path.
-            ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
-            logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
+            client_id: OAuth application client ID.
+            token: Complete OAuth token response, including ``access_token``.
+            client_secret: OAuth application client secret.
+            token_updater: Optional callback invoked with a refreshed token.
+            ssl_verify: Whether to verify SSL certificates.
+            logger: Optional logger used for request diagnostics.
         """
         self._url = f"{BASE_URL}/{VERSION}/{PATH}"
-        self._client_id = client_id
-        self._client_secret = client_secret
-        self._refresh_callback = refresh_callback
         self._logger = logger or logging.getLogger(__name__)
         self._ssl_verify = ssl_verify
         if not ssl_verify:
             requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
-        token = dict(token or {})
-        if access_token:
-            token["access_token"] = access_token
-        if refresh_token:
-            token["refresh_token"] = refresh_token
+        token = dict(token)
+        if not token.get("access_token"):
+            raise ValueError("token must contain an access_token")
         token.setdefault("token_type", "Bearer")
 
         self._session = OAuth2Session(
@@ -57,7 +50,7 @@ class RequestManager:
                 "client_id": client_id,
                 "client_secret": client_secret,
             },
-            token_updater=refresh_callback,
+            token_updater=token_updater,
         )
 
     def get(self, endpoint: str, params: dict | None = None) -> Result:

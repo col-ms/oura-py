@@ -40,15 +40,21 @@ from oura_py.models import (
 )
 
 
-class OuraClient:  # TODO update docstring
+class OuraClient:
+    """Authenticated client for Oura's v2 API.
+
+    A complete OAuth token can be supplied directly through ``token``. When
+    it is omitted, the client uses ``token_manager`` or creates a local
+    ``TokenManager`` backed by ``token_store``/``token_path``. Browser-based
+    authorization is only attempted when ``interactive=True``.
+    """
+
     def __init__(
         self,
         client_id: str,
-        access_token: str | None = None,
         token: dict | None = None,
         client_secret: str | None = None,
-        refresh_token: str | None = None,
-        refresh_callback: Callable | None = None,
+        token_updater: Callable | None = None,
         token_manager: TokenManager | None = None,
         token_store: TokenStore | None = None,
         interactive: bool = False,
@@ -57,23 +63,27 @@ class OuraClient:  # TODO update docstring
         ssl_verify: bool = True,
         logger: logging.Logger | None = None,
     ):
-        """Initializes the OuraClient instance.
+        """Initialize an authenticated Oura API client.
 
         Args:
-            personal_access_token (str): The personal access token for authenticating with the Oura API.
-            hostname (str, optional): The API hostname. Defaults to "api.ouraring.com".
-            ver (str, optional): The API version. Defaults to "v2".
-            path (str, optional): The API path. Defaults to "usercollection".
-            ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
-            logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
+            client_id: OAuth application client ID.
+            token: Complete OAuth token response. If omitted, a token is
+                resolved through ``token_manager`` or the configured store.
+            client_secret: OAuth application client secret.
+            token_updater: Optional callback for persisting refreshed tokens.
+            token_manager: Custom token acquisition and refresh handler.
+            token_store: Token store used by the default token manager.
+            interactive: Whether missing credentials may start browser auth.
+            token_path: Local JSON token path used by the default store.
+            redirect_uri: Registered OAuth callback URL.
+            ssl_verify: Whether to verify SSL certificates.
+            logger: Optional logger used by the client and request manager.
         """
         self._logger = logger or logging.getLogger(__name__)
-        if token is None and access_token is None:
+        if token is None:
             if token_manager is None:
                 if not client_secret:
-                    raise ValueError(
-                        "client_secret is required when no access_token is provided"
-                    )
+                    raise ValueError("client_secret is required when token is omitted")
                 store = token_store or JsonTokenStore(token_path or ".oura_tokens.json")
                 token_manager = TokenManager(
                     OuraOAuth2Client(client_id, client_secret),
@@ -83,11 +93,9 @@ class OuraClient:  # TODO update docstring
             token = token_manager.get_valid_token(interactive=interactive)
         self._manager = RequestManager(
             client_id=client_id,
-            access_token=access_token,
             token=token,
             client_secret=client_secret,
-            refresh_token=refresh_token,
-            refresh_callback=refresh_callback,
+            token_updater=token_updater,
             ssl_verify=ssl_verify,
             logger=self._logger,
         )
