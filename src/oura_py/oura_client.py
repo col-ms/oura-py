@@ -1,34 +1,38 @@
-from datetime import date, timedelta
+import datetime
 import logging
-from .helpers import RequestManager
-from .exceptions import OuraPyException
-from .models import (
-    PersonalInfo,
-    RingConfig,
-    SleepSummary,
-    SleepSummaryDatum,
-    ReadinessSummary,
-    ReadinessSummaryDatum,
+from collections.abc import Callable
+
+from oura_py.auth.oauth_manager import OuraOAuth2Client
+from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
+from oura_py.exceptions import OuraPyException
+from oura_py.helpers import RequestManager
+from oura_py.models import (
     ActivitySummary,
     ActivitySummaryDatum,
-    HeartRateSummary,
     HeartRateDatum,
-    StressSummary,
-    StressDatum,
-    ResilienceSummary,
+    HeartRateSummary,
+    PersonalInfo,
+    ReadinessSummary,
+    ReadinessSummaryDatum,
     ResilienceDatum,
-    Spo2Summary,
-    Spo2Datum,
-    TagSummary,
-    TagDatum,
-    RestModePeriodSummary,
+    ResilienceSummary,
     RestModePeriodDatum,
+    RestModePeriodSummary,
+    RingConfig,
     SessionData,
     SessionDatum,
     SleepDetailData,
     SleepDetailDatum,
+    SleepSummary,
+    SleepSummaryDatum,
     SleepTimeData,
     SleepTimeDatum,
+    Spo2Datum,
+    Spo2Summary,
+    StressDatum,
+    StressSummary,
+    TagDatum,
+    TagSummary,
     VO2MaxData,
     VO2MaxDatum,
     WorkoutData,
@@ -36,15 +40,22 @@ from .models import (
 )
 
 
-class OuraClient:
+class OuraClient:  # TODO update docstring
     def __init__(
         self,
-        personal_access_token: str,
-        hostname: str = "api.ouraring.com",
-        ver: str = "v2",
-        path: str = "usercollection",
+        client_id: str,
+        access_token: str | None = None,
+        token: dict | None = None,
+        client_secret: str | None = None,
+        refresh_token: str | None = None,
+        refresh_callback: Callable | None = None,
+        token_manager: TokenManager | None = None,
+        token_store: TokenStore | None = None,
+        interactive: bool = False,
+        token_path: str | None = None,
+        redirect_uri: str | None = None,
         ssl_verify: bool = True,
-        logger: logging.Logger = None,
+        logger: logging.Logger | None = None,
     ):
         """Initializes the OuraClient instance.
 
@@ -56,13 +67,27 @@ class OuraClient:
             ssl_verify (bool, optional): Whether to verify SSL certificates. Defaults to True.
             logger (logging.Logger, optional): Logger instance for logging. Defaults to None.
         """
-        self.url = f"https://{hostname}/{ver}/{path}"
         self._logger = logger or logging.getLogger(__name__)
+        if token is None and access_token is None:
+            if token_manager is None:
+                if not client_secret:
+                    raise ValueError(
+                        "client_secret is required when no access_token is provided"
+                    )
+                store = token_store or JsonTokenStore(token_path or ".oura_tokens.json")
+                token_manager = TokenManager(
+                    OuraOAuth2Client(client_id, client_secret),
+                    store=store,
+                    redirect_uri=redirect_uri,
+                )
+            token = token_manager.get_valid_token(interactive=interactive)
         self._manager = RequestManager(
-            personal_access_token=personal_access_token,
-            hostname=hostname,
-            ver=ver,
-            path=path,
+            client_id=client_id,
+            access_token=access_token,
+            token=token,
+            client_secret=client_secret,
+            refresh_token=refresh_token,
+            refresh_callback=refresh_callback,
             ssl_verify=ssl_verify,
             logger=self._logger,
         )
@@ -317,9 +342,15 @@ class OuraClient:
     def _prep_dates(
         self, start_date: str | None = None, end_date: str | None = None
     ) -> tuple[str, str]:
-        end = date.fromisoformat(end_date) if end_date else date.today()
+        end = (
+            datetime.date.fromisoformat(end_date)
+            if end_date
+            else datetime.datetime.now(tz=datetime.UTC).date()
+        )
         start = (
-            date.fromisoformat(start_date) if start_date else end - timedelta(days=1)
+            datetime.date.fromisoformat(start_date)
+            if start_date
+            else end - datetime.timedelta(days=1)
         )
         if start > end:
             log_msg = f"Start date must be before end date. Provided start: {start_date}, end: {end_date}"
