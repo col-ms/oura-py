@@ -1,10 +1,11 @@
 import pytest
 
-from oura_py import models
+from oura_py.data import models
+from oura_py.data.response import Result
 
 
 def test_good_result(result_data):
-    result = models.Result(**result_data)
+    result = Result(**result_data)
     assert result.status_code == 200
     assert result.message == "OK"
     assert result.data == {"key": "value"}
@@ -16,7 +17,7 @@ def test_bad_result(result_data):
         TypeError,
         match=f"status_code must be <class 'int'>, got {type(result_data['status_code'])}",
     ):
-        models.Result(**result_data)
+        Result(**result_data)
 
 
 def test_good_personal_info(personal_info_data):

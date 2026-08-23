@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlparse
 from dotenv import load_dotenv
 
 from oura_py.auth.oauth_manager import OuraOAuth2Client
-from oura_py.oura_client import OuraClient
+from oura_py.client.oura_client import OuraClient
 
 if __name__ == "__main__":
     load_dotenv()

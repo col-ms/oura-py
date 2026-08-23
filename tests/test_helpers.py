@@ -3,8 +3,8 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from oura_py.exceptions import OuraPyException
-from oura_py.helpers import RequestManager
+from oura_py.client.request_manager import RequestManager
+from oura_py.data.exceptions import OuraPyException
 
 
 @pytest.fixture
@@ -17,7 +17,7 @@ def test_good_manager_init(manager):
     assert manager._session.token["access_token"] == "test_token"
     assert manager._session.token["token_type"] == "Bearer"
     assert manager._ssl_verify is True
-    assert manager._logger.name == "oura_py.helpers"
+    assert manager._logger.name == "oura_py.client.request_manager"
 
 
 def test_init_ssl_verify_false():

@@ -15,8 +15,8 @@ from urllib.parse import parse_qs, urlparse
 import ngrok
 from dotenv import load_dotenv
 
+from oura_py.client.oura_client import OuraClient
 from oura_py.constants import WebhookDataType
-from oura_py.oura_client import OuraClient
 
 logger = logging.getLogger("oura_webhook")
 

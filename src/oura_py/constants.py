@@ -20,11 +20,7 @@ DOC_ID_ERR_MSG = "document_id and next_token cannot be used together"
 
 
 class WebhookDataType(str, Enum):
-    """
-    Data types accepted by Oura webhook subscriptions.
-
-    Docs: https://cloud.ouraring.com/v2/docs#operation/create_webhook_subscription_v2_webhook_subscription_post
-    """
+    """Data types accepted by Oura webhook subscriptions."""
 
     TAG = "tag"
     ENHANCED_TAG = "enhanced_tag"

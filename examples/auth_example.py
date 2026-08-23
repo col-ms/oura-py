@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 
-from oura_py.oura_client import OuraClient
+from oura_py.client.oura_client import OuraClient
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

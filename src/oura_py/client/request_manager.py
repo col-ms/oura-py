@@ -7,8 +7,8 @@ from requests_oauthlib import OAuth2Session
 from urllib3.exceptions import InsecureRequestWarning
 
 from oura_py.constants import BASE_URL, PATH, TOKEN_URL, VERSION
-from oura_py.exceptions import OuraPyException
-from oura_py.response import Result
+from oura_py.data.exceptions import OuraPyException
+from oura_py.data.response import Result
 
 
 class RequestManager:

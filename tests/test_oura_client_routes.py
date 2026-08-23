@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
-from oura_py.models import Result
-from oura_py.oura_client import OuraClient
+from oura_py.client.oura_client import OuraClient
+from oura_py.data.response import Result
 
 
 def make_client() -> OuraClient:

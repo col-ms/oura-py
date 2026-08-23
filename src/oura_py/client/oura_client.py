@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING, Any, Literal
 
 from oura_py.auth.oauth_manager import OuraOAuth2Client
 from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
+from oura_py.client.request_manager import RequestManager
 from oura_py.constants import DOC_ID_ERR_MSG, WebhookDataType
-from oura_py.exceptions import OuraPyException
-from oura_py.helpers import RequestManager
+from oura_py.data.exceptions import OuraPyException
 
 if TYPE_CHECKING:
-    from oura_py.models import (
+    from oura_py.data.models import (
         ActivitySummary,
         ActivitySummaryDatum,
         HeartRateDatum,
@@ -120,7 +120,7 @@ class OuraClient:
         if self._response_format == "raw":
             return None
         try:
-            from oura_py import models
+            from oura_py.data import models
         except ImportError as exception:
             raise ImportError("""
                 "Model responses require optional dependency. Install with `pip install "oura-py[models]"`
@@ -204,7 +204,7 @@ class OuraClient:
             return result.data
 
         models = self._get_model_classes()
-        return models.HeartRateSummary.model_validate(result.data)
+        return models.HeartRateSummary(**result.data)
 
     def get_stress_summary(
         self,
@@ -486,7 +486,7 @@ class OuraClient:
             return result.data
 
         models = self._get_model_classes()
-        return models.PersonalInfo.model_validate(result.data)
+        return models.PersonalInfo(**result.data)
 
     def get_ring_config(
         self,
@@ -507,7 +507,7 @@ class OuraClient:
             return result.data
 
         models = self._get_model_classes()
-        return models.RingConfig.model_validate(result.data)
+        return models.RingConfig(**result.data)
 
     def _get_raw_collection(
         self,
@@ -554,7 +554,7 @@ class OuraClient:
 
             models = self._get_model_classes()
             datum_class = getattr(models, datum_class_name)
-            return datum_class.model_validate(result.data)
+            return datum_class(**result.data)
 
         start_date, end_date = self._prep_dates(start, end)
         params = self._compact_params(
@@ -573,7 +573,7 @@ class OuraClient:
 
         models = self._get_model_classes()
         data_class = getattr(models, data_class_name)
-        return data_class.model_validate(result.data)
+        return data_class(**result.data)
 
     def _prep_dates(
         self, start_date: str | None = None, end_date: str | None = None
