@@ -1,4 +1,7 @@
+from datetime import datetime
+
 import pytest
+from pydantic import ValidationError
 
 from oura_py.data import models
 from oura_py.data.response import Result
@@ -32,10 +35,7 @@ def test_good_personal_info(personal_info_data):
 
 def test_bad_personal_info(personal_info_data):
     personal_info_data["id"] = 12345
-    with pytest.raises(
-        TypeError,
-        match=f"id must be <class 'str'>, got {type(personal_info_data['id'])}",
-    ):
+    with pytest.raises(ValidationError):
         models.PersonalInfo(**personal_info_data)
 
 
@@ -46,16 +46,13 @@ def test_good_ring_config(ring_config_data):
     assert ring_config.design == "horizon"
     assert ring_config.firmware_version == "3.2.2"
     assert ring_config.hardware_type == "gen3"
-    assert ring_config.set_up_at == "2024-12-31T00:00:00+00:00"
+    assert ring_config.set_up_at == datetime.fromisoformat("2024-12-31T00:00:00+00:00")
     assert ring_config.size == 9
 
 
 def test_bad_ring_config(ring_config_data):
     ring_config_data["color"] = 12345
-    with pytest.raises(
-        TypeError,
-        match=f"color must be <class 'str'>, got {type(ring_config_data['color'])}",
-    ):
+    with pytest.raises(ValidationError):
         models.RingConfigData(**ring_config_data)
 
 
@@ -73,9 +70,39 @@ def test_good_sleep_summary_contributor(sleep_summary_contributor_data):
 
 
 def test_bad_sleep_summary_contributor(sleep_summary_contributor_data):
-    sleep_summary_contributor_data["deep_sleep"] = "120"
-    with pytest.raises(
-        TypeError,
-        match=f"deep_sleep must be <class 'int'>, got {type(sleep_summary_contributor_data['deep_sleep'])}",
-    ):
+    sleep_summary_contributor_data["deep_sleep"] = []
+    with pytest.raises(ValidationError):
         models.SleepSummaryContributors(**sleep_summary_contributor_data)
+
+
+def test_nested_response_values_are_parsed():
+    summary = models.SleepSummary(
+        next_token=None,
+        data=[
+            {
+                "id": "sleep-1",
+                "contributors": {"deep_sleep": 90},
+                "day": "2025-01-01",
+                "score": 85,
+                "timestamp": "2025-01-01T08:00:00Z",
+            }
+        ],
+    )
+
+    assert isinstance(summary.data[0], models.SleepSummaryDatum)
+    assert summary.data[0].day.isoformat() == "2025-01-01"
+    assert summary.data[0].timestamp.tzinfo is not None
+    assert summary.data[0].contributors.deep_sleep == 90
+
+
+def test_enum_values_are_validated():
+    with pytest.raises(ValidationError):
+        models.WorkoutDatum(
+            id="workout-1",
+            activity="running",
+            day="2025-01-01",
+            end_datetime="2025-01-01T10:00:00Z",
+            intensity="invalid",
+            source="manual",
+            start_datetime="2025-01-01T09:00:00Z",
+        )
