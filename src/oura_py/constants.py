@@ -16,6 +16,8 @@ SCOPE = (
     "spo2",
 )
 
+DOC_ID_ERR_MSG = "document_id and next_token cannot be used together"
+
 
 class WebhookDataType(str, Enum):
     """

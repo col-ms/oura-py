@@ -11,24 +11,6 @@ def generic_type_checker(self):
 
 
 @dataclass
-class Result:
-    """the result of an HTTP request operation.
-
-    Attributes:
-        status_code: An integer indicating the status code of the result.
-        message: A human readable string describing the reason.
-        data: A list of dictionaries (or single dictionary) containing the response data.
-    """
-
-    status_code: int
-    message: str
-    data: dict
-
-    def __post_init__(self):
-        generic_type_checker(self)
-
-
-@dataclass
 class PersonalInfo:
     id: str
     age: int
