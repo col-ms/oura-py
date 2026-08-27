@@ -400,3 +400,76 @@ class WorkoutDatum(OuraModel):
 class WorkoutData(OuraModel):
     next_token: str | None = None
     data: list[WorkoutDatum] = Field(default_factory=list)
+
+
+class DailyCardiovascularAgeDatum(OuraModel):
+    id: str
+    day: date
+    pulse_wave_velocity: float | None = None
+    vascular_age: int | None = None
+
+
+class DailyCardiovascularAgeData(OuraModel):
+    next_token: str | None = None
+    data: list[DailyCardiovascularAgeDatum] = Field(default_factory=list)
+
+
+class RingBatteryLevelDatum(OuraModel):
+    timestamp: datetime
+    timestamp_unix: int
+    charging: bool | None = None
+    in_charger: bool | None = None
+    level: int
+
+
+class RingBatteryLevelData(OuraModel):
+    next_token: str | None = None
+    data: list[RingBatteryLevelDatum] = Field(default_factory=list)
+
+
+class BasicTagDatum(OuraModel):
+    id: str
+    day: date
+    text: str | None = None
+    timestamp: datetime
+    tags: list[str]
+
+
+class BasicTagData(OuraModel):
+    next_token: str | None = None
+    data: list[BasicTagDatum] = Field(default_factory=list)
+
+
+WebhookOperation = Literal["create", "update", "delete"]
+WebhookDataType = Literal[
+    "tag",
+    "enhanced_tag",
+    "workout",
+    "session",
+    "sleep",
+    "daily_sleep",
+    "daily_readiness",
+    "daily_activity",
+    "daily_spo2",
+    "sleep_time",
+    "rest_mode_period",
+    "ring_configuration",
+    "daily_stress",
+    "daily_cardiovascular_age",
+    "daily_resilience",
+    "vo2_max",
+    "meal",
+]
+
+
+class WebhookSubscriptionModel(OuraModel):
+    id: str
+    callback_url: str
+    event_type: WebhookOperation
+    data_type: WebhookDataType
+    expiration_time: str
+
+
+class WebhookSubscriptions(OuraModel):
+    data: list[WebhookSubscriptionModel] = Field(default_factory=list)
+    next_token: str | None = None

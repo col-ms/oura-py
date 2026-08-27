@@ -1,0 +1,111 @@
+name: Release confidence
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.11"
+          - os: ubuntu-latest
+            python-version: "3.12"
+          - os: ubuntu-latest
+            python-version: "3.13"
+          - os: ubuntu-latest
+            python-version: "3.14"
+          - os: windows-latest
+            python-version: "3.11"
+          - os: windows-latest
+            python-version: "3.14"
+          - os: macos-latest
+            python-version: "3.11"
+          - os: macos-latest
+            python-version: "3.14"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+      - run: uv sync --all-extras --dev --locked
+      - run: uv run ruff check .
+      - run: uv run pytest --cov=oura_py --cov-report=term-missing
+
+  build:
+    name: Build and validate distributions
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: astral-sh/setup-uv@v5
+      - run: uv build
+      - run: uvx twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: distributions
+          path: dist/
+          if-no-files-found: error
+
+  install:
+    name: Install ${{ matrix.distribution }} (${{ matrix.install }}, Python ${{ matrix.python-version }})
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.14"]
+        distribution: [wheel, sdist]
+        install: [base, models]
+
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: distributions
+          path: dist
+      - name: Install the distribution in a clean environment
+        shell: bash
+        run: |
+          python -m venv .venv-install
+          .venv-install/bin/python -m pip install --upgrade pip
+          if [ "${{ matrix.distribution }}" = "wheel" ]; then
+            package=$(find dist -name '*.whl' -print -quit)
+          else
+            package=$(find dist -name '*.tar.gz' -print -quit)
+          fi
+          if [ "${{ matrix.install }}" = "models" ]; then
+            .venv-install/bin/python -m pip install "${package}[models]"
+          else
+            .venv-install/bin/python -m pip install "$package"
+          fi
+          .venv-install/bin/python -m pip check
+      - name: Verify the selected installation mode
+        shell: bash
+        run: |
+          if [ "${{ matrix.install }}" = "models" ]; then
+            .venv-install/bin/python -c "from importlib.resources import files; from oura_py.data import models; assert models.PersonalInfo; assert files('oura_py').joinpath('py.typed').is_file()"
+          else
+            .venv-install/bin/python -c "import importlib.util; from importlib.resources import files; assert importlib.util.find_spec('pydantic') is None; import oura_py; import oura_py.data; assert files('oura_py').joinpath('py.typed').is_file()"
+          fi

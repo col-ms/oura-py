@@ -3,47 +3,17 @@ from __future__ import annotations
 import datetime
 import logging
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Any, Literal
+from typing import TYPE_CHECKING, Literal
 
 from oura_py.auth.oauth_manager import OuraOAuth2Client
 from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
 from oura_py.client.request_manager import RequestManager
 from oura_py.constants import DOC_ID_ERR_MSG, WebhookDataType
 from oura_py.data.exceptions import OuraPyException
+from oura_py.data.response import JSONValue
 
 if TYPE_CHECKING:
-    from oura_py.data.models import (
-        ActivitySummary,
-        ActivitySummaryDatum,
-        HeartRateDatum,
-        HeartRateSummary,
-        PersonalInfo,
-        ReadinessSummary,
-        ReadinessSummaryDatum,
-        ResilienceDatum,
-        ResilienceSummary,
-        RestModePeriodDatum,
-        RestModePeriodSummary,
-        RingConfig,
-        SessionData,
-        SessionDatum,
-        SleepDetailData,
-        SleepDetailDatum,
-        SleepSummary,
-        SleepSummaryDatum,
-        SleepTimeData,
-        SleepTimeDatum,
-        Spo2Datum,
-        Spo2Summary,
-        StressDatum,
-        StressSummary,
-        TagDatum,
-        TagSummary,
-        VO2MaxData,
-        VO2MaxDatum,
-        WorkoutData,
-        WorkoutDatum,
-    )
+    from oura_py.data import models
 
 
 ResponseFormat = Literal["raw", "models"]
@@ -134,7 +104,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> SleepSummary | SleepSummaryDatum:
+    ) -> models.SleepSummary | models.SleepSummaryDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_sleep",
             data_class_name="SleepSummary",
@@ -153,7 +123,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> ReadinessSummary | ReadinessSummaryDatum:
+    ) -> models.ReadinessSummary | models.ReadinessSummaryDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_readiness",
             data_class_name="ReadinessSummary",
@@ -172,7 +142,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> ActivitySummary | ActivitySummaryDatum:
+    ) -> models.ActivitySummary | models.ActivitySummaryDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_activity",
             data_class_name="ActivitySummary",
@@ -191,7 +161,7 @@ class OuraClient:
         next_token: str | None = None,
         latest: bool | None = None,
         fields: str | None = None,
-    ) -> HeartRateSummary | HeartRateDatum:
+    ) -> models.HeartRateSummary | models.HeartRateDatum | JSONValue:
         params = self._compact_params(
             start_datetime=start_datetime,
             end_datetime=end_datetime,
@@ -204,7 +174,7 @@ class OuraClient:
             return result.data
 
         models = self._get_model_classes()
-        return models.HeartRateSummary(**result.data)
+        return models.HeartRateSummary.model_validate(result.data)
 
     def get_stress_summary(
         self,
@@ -213,7 +183,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> StressSummary | StressDatum:
+    ) -> models.StressSummary | models.StressDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_stress",
             data_class_name="StressSummary",
@@ -232,7 +202,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> ResilienceSummary | ResilienceDatum:
+    ) -> models.ResilienceSummary | models.ResilienceDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_resilience",
             data_class_name="ResilienceSummary",
@@ -251,7 +221,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> Spo2Summary | Spo2Datum:
+    ) -> models.Spo2Summary | models.Spo2Datum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_spo2",
             data_class_name="Spo2Summary",
@@ -270,7 +240,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> TagSummary | TagDatum:
+    ) -> models.TagSummary | models.TagDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="enhanced_tag",
             data_class_name="TagSummary",
@@ -289,7 +259,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> RestModePeriodSummary | RestModePeriodDatum:
+    ) -> models.RestModePeriodSummary | models.RestModePeriodDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="rest_mode_period",
             data_class_name="RestModePeriodSummary",
@@ -308,7 +278,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> SessionData | SessionDatum:
+    ) -> models.SessionData | models.SessionDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="session",
             data_class_name="SessionData",
@@ -327,7 +297,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> SleepDetailData | SleepDetailDatum:
+    ) -> models.SleepDetailData | models.SleepDetailDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="sleep",
             data_class_name="SleepDetailData",
@@ -346,7 +316,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> SleepTimeData | SleepTimeDatum:
+    ) -> models.SleepTimeData | models.SleepTimeDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="sleep_time",
             data_class_name="SleepTimeData",
@@ -365,7 +335,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> VO2MaxData | VO2MaxDatum:
+    ) -> models.VO2MaxData | models.VO2MaxDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="vO2_max",
             data_class_name="VO2MaxData",
@@ -384,7 +354,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> WorkoutData | WorkoutDatum:
+    ) -> models.WorkoutData | models.WorkoutDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="workout",
             data_class_name="WorkoutData",
@@ -403,10 +373,21 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> Any:
+    ) -> (
+        models.DailyCardiovascularAgeData
+        | models.DailyCardiovascularAgeDatum
+        | JSONValue
+    ):
         """Get daily cardiovascular-age records or one record by ID."""
-        return self._get_raw_collection(
-            "daily_cardiovascular_age", start, end, next_token, document_id, fields
+        return self._get_summary_generic(
+            summary_endpoint="daily_cardiovascular_age",
+            data_class_name="DailyCardiovascularAgeData",
+            datum_class_name="DailyCardiovascularAgeDatum",
+            start=start,
+            end=end,
+            next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
     def get_ring_battery_level(
@@ -416,7 +397,7 @@ class OuraClient:
         next_token: str | None = None,
         latest: bool | None = None,
         fields: str | None = None,
-    ) -> Any:
+    ) -> models.RingBatteryLevelData | JSONValue:
         """Get ring battery-level time-series data."""
         params = self._compact_params(
             start_datetime=start_datetime,
@@ -426,7 +407,11 @@ class OuraClient:
             fields=fields,
         )
         result = self._manager.get("ring_battery_level", params=params)
-        return result.data
+        if self._response_format == "raw":
+            return result.data
+
+        models = self._get_model_classes()
+        return models.RingBatteryLevelData.model_validate(result.data)
 
     def get_tag(
         self,
@@ -435,18 +420,29 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ) -> Any:
+    ) -> models.BasicTagData | models.BasicTagDatum | JSONValue:
         """Get basic tag records or one record by ID."""
-        return self._get_raw_collection(
-            "tag", start, end, next_token, document_id, fields
+        return self._get_summary_generic(
+            summary_endpoint="tag",
+            data_class_name="BasicTagData",
+            datum_class_name="BasicTagDatum",
+            start=start,
+            end=end,
+            next_token=next_token,
+            document_id=document_id,
+            fields=fields,
         )
 
-    def get_webhook_subscriptions(self) -> Any:
+    def get_webhook_subscriptions(self) -> models.WebhookSubscriptions | JSONValue:
         """List the application's webhook subscriptions."""
         result = self._manager.webhook_get("../webhook/subscription")
-        return result.data
+        if self._response_format == "raw":
+            return result.data
 
-    def create_webhook_subscription(self, data: dict) -> Any:
+        models = self._get_model_classes()
+        return models.WebhookSubscriptions.model_validate(result.data)
+
+    def create_webhook_subscription(self, data: dict) -> JSONValue:
         """Create a webhook subscription from an OpenAPI request payload."""
         payload = dict(data)
         if isinstance(payload.get("data_type"), WebhookDataType):
@@ -454,46 +450,54 @@ class OuraClient:
         result = self._manager.webhook_post("../webhook/subscription", data=payload)
         return result.data
 
-    def get_webhook_subscription(self, subscription_id: str) -> Any:
+    def get_webhook_subscription(
+        self, subscription_id: str
+    ) -> models.WebhookSubscriptionModel | JSONValue:
         """Get one webhook subscription by ID."""
         result = self._manager.webhook_get(f"../webhook/subscription/{subscription_id}")
-        return result.data
+        if self._response_format == "raw":
+            return result.data
 
-    def update_webhook_subscription(self, subscription_id: str, data: dict) -> Any:
+        models = self._get_model_classes()
+        return models.WebhookSubscriptionModel.model_validate(result.data)
+
+    def update_webhook_subscription(
+        self, subscription_id: str, data: dict
+    ) -> JSONValue:
         """Update a webhook subscription."""
         result = self._manager.webhook_put(
             f"../webhook/subscription/{subscription_id}", data=data
         )
         return result.data
 
-    def delete_webhook_subscription(self, subscription_id: str) -> Any:
+    def delete_webhook_subscription(self, subscription_id: str) -> JSONValue:
         """Delete a webhook subscription."""
         result = self._manager.webhook_delete(
             f"../webhook/subscription/{subscription_id}"
         )
         return result.data
 
-    def renew_webhook_subscription(self, subscription_id: str) -> Any:
+    def renew_webhook_subscription(self, subscription_id: str) -> JSONValue:
         """Renew a webhook subscription."""
         result = self._manager.webhook_put(
             f"../webhook/subscription/renew/{subscription_id}"
         )
         return result.data
 
-    def get_personal_info(self) -> PersonalInfo | dict:
+    def get_personal_info(self) -> models.PersonalInfo | JSONValue:
         result = self._manager.get("personal_info")
         if self._response_format == "raw":
             return result.data
 
         models = self._get_model_classes()
-        return models.PersonalInfo(**result.data)
+        return models.PersonalInfo.model_validate(result.data)
 
     def get_ring_config(
         self,
         document_id: str | None = None,
         next_token: str | None = None,
         fields: str | None = None,
-    ) -> RingConfig | dict:
+    ) -> models.RingConfig | JSONValue:
         if document_id and next_token:
             raise ValueError(DOC_ID_ERR_MSG)
         endpoint = (
@@ -507,7 +511,7 @@ class OuraClient:
             return result.data
 
         models = self._get_model_classes()
-        return models.RingConfig(**result.data)
+        return models.RingConfig.model_validate(result.data)
 
     def _get_raw_collection(
         self,
@@ -517,7 +521,7 @@ class OuraClient:
         next_token: str | None,
         document_id: str | None,
         fields: str | None,
-    ) -> Any:
+    ) -> JSONValue:
         if document_id and next_token:
             raise ValueError(DOC_ID_ERR_MSG)
         if document_id:
@@ -543,7 +547,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
-    ):
+    ) -> object:
         if document_id and next_token:
             raise ValueError(DOC_ID_ERR_MSG)
 
@@ -554,7 +558,7 @@ class OuraClient:
 
             models = self._get_model_classes()
             datum_class = getattr(models, datum_class_name)
-            return datum_class(**result.data)
+            return datum_class.model_validate(result.data)
 
         start_date, end_date = self._prep_dates(start, end)
         params = self._compact_params(
@@ -573,7 +577,7 @@ class OuraClient:
 
         models = self._get_model_classes()
         data_class = getattr(models, data_class_name)
-        return data_class(**result.data)
+        return data_class.model_validate(result.data)
 
     def _prep_dates(
         self, start_date: str | None = None, end_date: str | None = None

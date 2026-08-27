@@ -1,5 +1,5 @@
 version = 1
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 
 [[package]]
 name = "annotated-types"
@@ -402,6 +402,7 @@ models = [
 dev = [
     { name = "ngrok" },
     { name = "pre-commit" },
+    { name = "pydantic" },
     { name = "pylint" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -420,6 +421,7 @@ requires-dist = [
 dev = [
     { name = "ngrok", specifier = ">=1.7.0" },
     { name = "pre-commit", specifier = ">=4.1.0" },
+    { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pylint", specifier = ">=3.3.4" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-cov", specifier = ">=6.0.0" },

@@ -1,6 +1,5 @@
 import logging
 from collections.abc import Callable
-from json import JSONDecodeError
 
 import requests
 from requests_oauthlib import OAuth2Session
@@ -172,7 +171,7 @@ class RequestManager:
         else:
             try:
                 data_out = response.json()
-            except (ValueError, JSONDecodeError) as e:
+            except ValueError as e:
                 self._logger.error(msg=log_post.format(False, None, e))
                 raise OuraPyException("Bad JSON in response") from e
         # Result currently models payloads as dictionaries. Some Oura

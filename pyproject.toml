@@ -1,10 +1,15 @@
 [project]
 name = "oura-py"
 version = "0.1.0"
-description = "Add your description here"
+description = "A python wrapper for Oura Ring's V2 API."
+authors = [{ name = "Collin Smith" }]
 readme = "README.md"
-requires-python = ">=3.12"
+license = "GPL-3.0-only"
+requires-python = ">=3.11"
 dependencies = ["requests-oauthlib>=2.0.0", "requests>=2.32.3"]
+
+[project.urls]
+GitHub = "https://github.com/col-ms/oura-py"
 
 [project.optional-dependencies]
 models = ["pydantic>=2.10"]
@@ -15,13 +20,22 @@ build-backend = "hatchling.build"
 
 [tool.uv]
 dev-dependencies = [
+
     "pre-commit>=4.1.0",
+
     "pylint>=3.3.4",
+
     "pytest-cov>=6.0.0",
+
     "pytest>=8.3.4",
+
     "ngrok>=1.7.0",
+
     "python-dotenv>=1.0.1",
+
     "ruff>=0.9.6",
+
+    "pydantic>=2.13.4",
 ]
 
 [tool.pyright]

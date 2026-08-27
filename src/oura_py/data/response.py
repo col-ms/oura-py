@@ -1,4 +1,21 @@
 from dataclasses import dataclass
+from typing import TypeAlias
+
+JSONValue: TypeAlias = (
+    None | bool | int | float | str | list["JSONValue"] | dict[str, "JSONValue"]
+)
+
+
+def _is_json_value(value: object) -> bool:
+    if value is None or isinstance(value, (bool, int, float, str)):
+        return True
+    if isinstance(value, list):
+        return all(_is_json_value(item) for item in value)
+    if isinstance(value, dict):
+        return all(
+            isinstance(key, str) and _is_json_value(item) for key, item in value.items()
+        )
+    return False
 
 
 @dataclass
@@ -7,15 +24,12 @@ class Result:
 
     status_code: int
     message: str
-    data: dict
+    data: JSONValue
 
     def __post_init__(self) -> None:
-        expected_types = {
-            "status_code": int,
-            "message": str,
-            "data": dict,
-        }
-        for name, expected_type in expected_types.items():
-            value = getattr(self, name)
-            if not isinstance(value, expected_type):
-                raise TypeError(f"{name} must be {expected_type}, got {type(value)}")
+        if not isinstance(self.status_code, int):
+            raise TypeError(f"status_code must be {int}, got {type(self.status_code)}")
+        if not isinstance(self.message, str):
+            raise TypeError(f"message must be {str}, got {type(self.message)}")
+        if not _is_json_value(self.data):
+            raise TypeError("data must be a JSON-compatible value")
