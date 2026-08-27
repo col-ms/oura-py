@@ -3,7 +3,10 @@ from urllib.parse import quote
 import pytest
 
 from oura_py.auth.oauth_manager import OuraOAuth2Client
-from tests.constants import AUTHORIZE_BASE_URL, CLIENT_ID, CLIENT_SECRET
+
+CLIENT_ID = "TEST_ID"
+CLIENT_SECRET = "TEST_SECRET"
+AUTHORIZE_BASE_URL = "https://cloud.ouraring.com/oauth/authorize"
 
 
 @pytest.fixture
