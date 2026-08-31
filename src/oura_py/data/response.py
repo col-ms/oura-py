@@ -1,7 +1,6 @@
 from dataclasses import dataclass
-from typing import TypeAlias
 
-JSONValue: TypeAlias = (
+JSONValue: type = (
     None | bool | int | float | str | list["JSONValue"] | dict[str, "JSONValue"]
 )
 

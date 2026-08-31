@@ -1,5 +1,6 @@
 import logging
 import os
+from pprint import pprint
 
 from dotenv import load_dotenv
 
@@ -14,12 +15,12 @@ if __name__ == "__main__":
 
     # On the first run this opens the Oura consent page. Subsequent runs use
     # the cached token and refresh it automatically when necessary.
-    oura_client = OuraClient(
+    client = OuraClient(
         client_id=client_id,
         client_secret=client_secret,
-        token_path=".oura_tokens.json",
         interactive=True,
+        response_format="models",
     )
 
-    personal_info = oura_client.get_personal_info()
-    print("Authenticated Oura user: %s", personal_info)
+    result = client.get_personal_info()
+    pprint(result)

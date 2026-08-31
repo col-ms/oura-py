@@ -104,6 +104,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.SleepSummary | models.SleepSummaryDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_sleep",
@@ -114,6 +115,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_readiness_summary(
@@ -123,6 +125,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.ReadinessSummary | models.ReadinessSummaryDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_readiness",
@@ -133,6 +136,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_activity_summary(
@@ -142,6 +146,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.ActivitySummary | models.ActivitySummaryDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_activity",
@@ -152,6 +157,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_heartrate_summary(
@@ -183,6 +189,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.StressSummary | models.StressDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_stress",
@@ -193,6 +200,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_resilience_summary(
@@ -202,6 +210,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.ResilienceSummary | models.ResilienceDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_resilience",
@@ -212,6 +221,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_spo2_summary(
@@ -221,6 +231,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.Spo2Summary | models.Spo2Datum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="daily_spo2",
@@ -231,6 +242,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_tags_summary(
@@ -240,6 +252,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.TagSummary | models.TagDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="enhanced_tag",
@@ -250,6 +263,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_rest_mode_periods(
@@ -259,6 +273,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.RestModePeriodSummary | models.RestModePeriodDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="rest_mode_period",
@@ -269,6 +284,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_session_data(
@@ -278,6 +294,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.SessionData | models.SessionDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="session",
@@ -288,6 +305,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_sleep_detail(
@@ -297,6 +315,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.SleepDetailData | models.SleepDetailDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="sleep",
@@ -307,6 +326,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_sleep_times(
@@ -316,6 +336,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.SleepTimeData | models.SleepTimeDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="sleep_time",
@@ -326,6 +347,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_vo2_max(
@@ -335,6 +357,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.VO2MaxData | models.VO2MaxDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="vO2_max",
@@ -345,6 +368,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_workouts(
@@ -354,6 +378,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.WorkoutData | models.WorkoutDatum | JSONValue:
         return self._get_summary_generic(
             summary_endpoint="workout",
@@ -364,6 +389,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_daily_cardiovascular_age(
@@ -373,6 +399,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> (
         models.DailyCardiovascularAgeData
         | models.DailyCardiovascularAgeDatum
@@ -388,6 +415,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_ring_battery_level(
@@ -420,6 +448,7 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> models.BasicTagData | models.BasicTagDatum | JSONValue:
         """Get basic tag records or one record by ID."""
         return self._get_summary_generic(
@@ -431,6 +460,7 @@ class OuraClient:
             next_token=next_token,
             document_id=document_id,
             fields=fields,
+            response_format=response_format,
         )
 
     def get_webhook_subscriptions(self) -> models.WebhookSubscriptions | JSONValue:
@@ -547,13 +577,16 @@ class OuraClient:
         next_token: str | None = None,
         document_id: str | None = None,
         fields: str | None = None,
+        response_format: ResponseFormat | None = None,
     ) -> object:
         if document_id and next_token:
             raise ValueError(DOC_ID_ERR_MSG)
 
+        response_format = response_format or self._response_format
+
         if document_id:
             result = self._manager.get(f"{summary_endpoint}/{document_id}")
-            if self._response_format == "raw":
+            if response_format == "raw":
                 return result.data
 
             models = self._get_model_classes()
@@ -572,7 +605,7 @@ class OuraClient:
             params=params,
         )
 
-        if self._response_format == "raw":
+        if response_format == "raw":
             return result.data
 
         models = self._get_model_classes()

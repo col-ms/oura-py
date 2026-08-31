@@ -2,7 +2,7 @@
 name = "oura-py"
 version = "0.1.2"
 description = "A python wrapper for Oura Ring's V2 API."
-authors = [{ name = "Collin Smith" }]
+authors = [{ name = "Collin Smith", email = "collinmsmith22@gmail.com" }]
 readme = "README.md"
 license = "GPL-3.0-only"
 requires-python = ">=3.12"
@@ -18,8 +18,9 @@ models = ["pydantic>=2.10"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.uv]
-dev-dependencies = [
+
+[dependency-groups]
+dev = [
 
     "pre-commit>=4.1.0",
 

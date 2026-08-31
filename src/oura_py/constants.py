@@ -6,14 +6,17 @@ PATH = "usercollection"
 AUTHORIZE_URL = "https://cloud.ouraring.com/oauth/authorize"
 TOKEN_URL = f"{BASE_URL}/oauth/token"
 SCOPE = (
-    "email",
-    "personal",
-    "daily",
-    "heartrate",
-    "workout",
-    "tag",
-    "session",
-    "spo2",
+    "extapi:email",
+    "extapi:personal",
+    "extapi:daily",
+    "extapi:heartrate",
+    "extapi:workout",
+    "extapi:tag",
+    "extapi:session",
+    "extapi:spo2",
+    "extapi:ring_configuration",
+    "extapi:stress",
+    "extapi:heart_health",
 )
 
 DOC_ID_ERR_MSG = "document_id and next_token cannot be used together"
