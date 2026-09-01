@@ -3,7 +3,6 @@ from collections.abc import Callable
 
 import requests
 from requests_oauthlib import OAuth2Session
-from urllib3.exceptions import InsecureRequestWarning
 
 from oura_py.constants import BASE_URL, PATH, TOKEN_URL, VERSION
 from oura_py.data.exceptions import OuraPyException
@@ -37,7 +36,9 @@ class RequestManager:
         self._logger = logger or logging.getLogger(__name__)
         self._ssl_verify = ssl_verify
         if not ssl_verify:
-            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+            import urllib3
+
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
         token = dict(token)
         if not token.get("access_token"):

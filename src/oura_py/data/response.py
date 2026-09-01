@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-JSONValue: type = (
-    None | bool | int | float | str | list["JSONValue"] | dict[str, "JSONValue"]
+type JSONValue = (
+    dict[str, JSONValue] | list[JSONValue] | str | int | float | bool | None
 )
 
 

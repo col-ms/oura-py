@@ -10,6 +10,7 @@ import logging
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
+from typing import cast
 from urllib.parse import parse_qs, urlparse
 
 import ngrok
@@ -17,6 +18,7 @@ from dotenv import load_dotenv
 
 from oura_py.client.oura_client import OuraClient
 from oura_py.constants import WebhookDataType
+from oura_py.data.response import JSONValue
 
 logger = logging.getLogger("oura_webhook")
 
@@ -93,7 +95,7 @@ if __name__ == "__main__":
 
     server = ThreadingHTTPServer(("127.0.0.1", port), OuraWebhookHandler)
     Thread(target=server.serve_forever, daemon=True).start()
-    listener = ngrok.forward(f"127.0.0.1:{port}", "http", authtoken_from_env=True)
+    listener = ngrok.forward(f"127.0.0.1:{port}", authtoken_from_env=True)
 
     public_url = listener.url()
     callback_url = f"{public_url}/oura-webhook"
@@ -106,16 +108,21 @@ if __name__ == "__main__":
     )
 
     event_type = "update"
-    data_type = WebhookDataType.DAILY_SLEEP
+    data_type = WebhookDataType.DAILY_ACTIVITY
 
-    existing = client.get_webhook_subscriptions().data
-    existing_items = existing.get("data", []) if isinstance(existing, dict) else []
+    existing = client.get_webhook_subscriptions()
+    existing_items: list[JSONValue] = (
+        cast(list[JSONValue], existing.get("data", []))
+        if isinstance(existing, dict)
+        else []
+    )
 
-    matching: dict | None = next(
+    matching: dict[str, JSONValue] | None = next(
         (
             item
             for item in existing_items
-            if item.get("callback_url") == callback_url
+            if isinstance(item, dict)
+            and item.get("callback_url") == callback_url
             and item.get("event_type") == event_type
             and item.get("data_type") == data_type.value
         ),
@@ -132,7 +139,7 @@ if __name__ == "__main__":
                 "event_type": event_type,
                 "data_type": data_type,
             }
-        ).data
+        )
         print("Created subscription:", subscription)
     print(f"Listening for webhook events on http://0.0.0.0:{port}")
 

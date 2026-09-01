@@ -22,5 +22,6 @@ if __name__ == "__main__":
         response_format="models",
     )
 
-    result = client.get_personal_info()
+    result = client.get_personal_info(response_format="raw")
     pprint(result)
+    print(type(result))

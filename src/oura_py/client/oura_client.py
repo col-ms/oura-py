@@ -463,7 +463,9 @@ class OuraClient:
             response_format=response_format,
         )
 
-    def get_webhook_subscriptions(self) -> models.WebhookSubscriptions | JSONValue:
+    def get_webhook_subscriptions(
+        self,
+    ) -> models.WebhookSubscriptions | JSONValue:
         """List the application's webhook subscriptions."""
         result = self._manager.webhook_get("../webhook/subscription")
         if self._response_format == "raw":
@@ -514,9 +516,12 @@ class OuraClient:
         )
         return result.data
 
-    def get_personal_info(self) -> models.PersonalInfo | JSONValue:
+    def get_personal_info(
+        self, response_format: ResponseFormat | None = None
+    ) -> models.PersonalInfo | JSONValue:
         result = self._manager.get("personal_info")
-        if self._response_format == "raw":
+        response_format = response_format or self._response_format
+        if response_format == "raw":
             return result.data
 
         models = self._get_model_classes()
@@ -578,7 +583,7 @@ class OuraClient:
         document_id: str | None = None,
         fields: str | None = None,
         response_format: ResponseFormat | None = None,
-    ) -> object:
+    ) -> JSONValue:
         if document_id and next_token:
             raise ValueError(DOC_ID_ERR_MSG)
 
