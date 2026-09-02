@@ -3,18 +3,15 @@ from __future__ import annotations
 import datetime
 import logging
 from collections.abc import Callable
-from typing import TYPE_CHECKING, Literal
+from typing import Any, Literal
 
 from oura_py.auth.oauth_manager import OuraOAuth2Client
 from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
 from oura_py.client.request_manager import RequestManager
 from oura_py.constants import DOC_ID_ERR_MSG, WebhookDataType
+from oura_py.data import models
 from oura_py.data.exceptions import OuraPyException
-from oura_py.data.response import JSONValue
-
-if TYPE_CHECKING:
-    from oura_py.data import models
-
+from oura_py.data.response import JSONValue, OuraResponse
 
 ResponseFormat = Literal["raw", "models"]
 
@@ -96,6 +93,26 @@ class OuraClient:
                 "Model responses require optional dependency. Install with `pip install "oura-py[models]"`
             """) from exception
         return models
+
+    def daily_sleep(
+        self,
+        *,
+        start_date: str | None = None,
+        end_date: str | None = None,
+    ) -> OuraResponse[models.SleepSummary]:
+        params: dict[str, Any] = {}
+
+        if start_date is not None:
+            params["start_date"] = start_date
+
+        if end_date is not None:
+            params["end_date"] = end_date
+
+        data, metadata = self._fetch("daily_sleep", params=params)
+
+        return OuraResponse(
+            data=data, model_type=models.SleepSummary, metadata=metadata
+        )
 
     def get_sleep_summary(
         self,
@@ -571,6 +588,33 @@ class OuraClient:
         )
         result = self._manager.get(endpoint, params=params)
         return result.data
+
+    def _fetch(
+        self, endpoint: str, *, params: dict[str, Any] | None = None
+    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+
+        records: list[dict[str, Any]] = []
+        request_params: dict = dict(params or {})
+        next_token: str | None = None
+
+        while True:
+            if next_token is not None:
+                request_params["next_token"] = next_token
+
+            result = self._manager.get(endpoint, params=request_params)
+            data = result.data
+            records.extend(data.get("data", []))
+            next_token = data.get("next_token")
+
+            if next_token is None:
+                break
+
+        metadata = {
+            "endpoint": endpoint,
+            "request_params": params,
+        }
+
+        return records, metadata
 
     def _get_summary_generic(
         self,

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 type JSONValue = (
     dict[str, JSONValue] | list[JSONValue] | str | int | float | bool | None
@@ -32,3 +33,47 @@ class Result:
             raise TypeError(f"message must be {str}, got {type(self.message)}")
         if not _is_json_value(self.data):
             raise TypeError("data must be a JSON-compatible value")
+
+
+class OuraResponse[T]:
+    def __init__(
+        self,
+        data: Any,
+        model_type: type[T] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ):
+        self._data = data
+        self._model_type = model_type
+        self._metadata = metadata
+
+        self._model_cache: T | list[T] | None = None
+        self._polars_cache: None = None
+
+    def raw(self) -> Any:
+        return self._data
+
+    def model(self) -> T | list[T]:
+        if self._model_type is None:
+            raise TypeError("No data model defined for this response")
+
+        if self._model_cache:
+            return self._model_cache
+
+        if isinstance(self._data, list):
+            self._model_cache = [
+                self._model_type.model_validate(item) for item in self._data
+            ]
+        else:
+            self._model_cache = self._model_type.model_validate(self._data)
+
+        return self._model_cache
+
+    def to_polars(self):
+        raise NotImplementedError("Polars conversion yet to be implemented")
+
+    def to_pandas(self):
+        raise NotImplementedError("Pandas conversion yet to be implemented")
+
+    @property
+    def metadata(self) -> dict[str, Any]:
+        return self._metadata
