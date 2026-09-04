@@ -94,12 +94,12 @@ class OuraClient:
             """) from exception
         return models
 
-    def daily_sleep(
+    def daily_activity(
         self,
         *,
         start_date: str | None = None,
         end_date: str | None = None,
-    ) -> OuraResponse[models.SleepSummary]:
+    ) -> OuraResponse[models.DailyAcitivity]:
         params: dict[str, Any] = {}
 
         if start_date is not None:
@@ -111,8 +111,26 @@ class OuraClient:
         data, metadata = self._fetch("daily_sleep", params=params)
 
         return OuraResponse(
-            data=data, model_type=models.SleepSummary, metadata=metadata
+            data=data, model_type=models.DailyActivity, metadata=metadata
         )
+
+    def daily_sleep(
+        self,
+        *,
+        start_date: str | None = None,
+        end_date: str | None = None,
+    ) -> OuraResponse[models.DailySleep]:
+        params: dict[str, Any] = {}
+
+        if start_date is not None:
+            params["start_date"] = start_date
+
+        if end_date is not None:
+            params["end_date"] = end_date
+
+        data, metadata = self._fetch("daily_sleep", params=params)
+
+        return OuraResponse(data=data, model_type=models.DailySleep, metadata=metadata)
 
     def get_sleep_summary(
         self,
@@ -589,7 +607,7 @@ class OuraClient:
         result = self._manager.get(endpoint, params=params)
         return result.data
 
-    def _fetch(
+    def _fetch(  # TODO add kwarg support & date range defaults
         self, endpoint: str, *, params: dict[str, Any] | None = None
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
 

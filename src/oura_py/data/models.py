@@ -66,6 +66,29 @@ WorkoutIntensity = Literal["easy", "moderate", "hard"]
 WorkoutSource = Literal["manual", "autodetected", "confirmed", "workout_heart_rate"]
 
 
+class DailyActivity(OuraModel):
+    id: str
+    # TODO fill in class
+
+
+class DailySleepContributors(OuraModel):
+    deep_sleep: int
+    efficiency: int
+    latency: int
+    rem_sleep: int
+    restfulness: int
+    timing: int
+    total_sleep: int
+
+
+class DailySleep(OuraModel):
+    id: str
+    contributors: DailySleepContributors
+    day: str
+    score: int
+    timestamp: datetime
+
+
 class PersonalInfo(OuraModel):
     id: str
     age: int | None = None
