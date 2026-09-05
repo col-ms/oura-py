@@ -22,9 +22,7 @@ if __name__ == "__main__":
         response_format="models",
     )
 
-    new_result = client.daily_sleep(
-        start_date="2026-08-20"
-    )  # TODO add kwarg support (for fields)
-    pprint(new_result.raw())
+    result = client.daily_sleep(start_date="2026-07-01", fields=["day", "score"])
+    pprint(result.raw())
 
     log.info("Exiting...")

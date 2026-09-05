@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import logging
 from collections.abc import Callable
+from datetime import timedelta
 from typing import Any, Literal
 
 from oura_py.auth.oauth_manager import OuraOAuth2Client
@@ -114,21 +115,9 @@ class OuraClient:
             data=data, model_type=models.DailyActivity, metadata=metadata
         )
 
-    def daily_sleep(
-        self,
-        *,
-        start_date: str | None = None,
-        end_date: str | None = None,
-    ) -> OuraResponse[models.DailySleep]:
-        params: dict[str, Any] = {}
+    def daily_sleep(self, **kwargs) -> OuraResponse[models.DailySleep]:
 
-        if start_date is not None:
-            params["start_date"] = start_date
-
-        if end_date is not None:
-            params["end_date"] = end_date
-
-        data, metadata = self._fetch("daily_sleep", params=params)
+        data, metadata = self._fetch("daily_sleep", **kwargs)
 
         return OuraResponse(data=data, model_type=models.DailySleep, metadata=metadata)
 
@@ -607,19 +596,25 @@ class OuraClient:
         result = self._manager.get(endpoint, params=params)
         return result.data
 
-    def _fetch(  # TODO add kwarg support & date range defaults
-        self, endpoint: str, *, params: dict[str, Any] | None = None
+    def _fetch(
+        self, endpoint: str, **kwargs: Any
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
 
+        today = dt.datetime.now(dt.UTC).date()
+
+        kwargs.setdefault("end_date", today.isoformat())
+        kwargs.setdefault("start_date", (today - timedelta(days=1)).isoformat())
+
+        params = self._compact_params(**kwargs)
+
         records: list[dict[str, Any]] = []
-        request_params: dict = dict(params or {})
         next_token: str | None = None
 
         while True:
             if next_token is not None:
-                request_params["next_token"] = next_token
+                params["next_token"] = next_token
 
-            result = self._manager.get(endpoint, params=request_params)
+            result = self._manager.get(endpoint, params=params)
             data = result.data
             records.extend(data.get("data", []))
             next_token = data.get("next_token")
@@ -629,7 +624,7 @@ class OuraClient:
 
         metadata = {
             "endpoint": endpoint,
-            "request_params": params,
+            "params": params,
         }
 
         return records, metadata
@@ -683,14 +678,14 @@ class OuraClient:
         self, start_date: str | None = None, end_date: str | None = None
     ) -> tuple[str, str]:
         end = (
-            datetime.date.fromisoformat(end_date)
+            dt.datetime.date.fromisoformat(end_date)
             if end_date
-            else datetime.datetime.now(tz=datetime.UTC).date()
+            else dt.datetime.now(tz=dt.UTC).date()
         )
         start = (
-            datetime.date.fromisoformat(start_date)
+            dt.datetime.date.fromisoformat(start_date)
             if start_date
-            else end - datetime.timedelta(days=1)
+            else end - timedelta(days=1)
         )
         if start > end:
             log_msg = f"Start date must be before end date. Provided start: {start_date}, end: {end_date}"
