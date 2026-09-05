@@ -95,94 +95,35 @@ class OuraClient:
             """) from exception
         return models
 
-    def daily_activity(
-        self,
-        *,
-        start_date: str | None = None,
-        end_date: str | None = None,
-    ) -> OuraResponse[models.DailyAcitivity]:
-        params: dict[str, Any] = {}
-
-        if start_date is not None:
-            params["start_date"] = start_date
-
-        if end_date is not None:
-            params["end_date"] = end_date
-
-        data, metadata = self._fetch("daily_sleep", params=params)
-
+    def daily_activity(self, **kwargs) -> OuraResponse[models.DailyActivity]:
+        data, metadata = self._fetch("daily_sleep", **kwargs)
         return OuraResponse(
             data=data, model_type=models.DailyActivity, metadata=metadata
         )
 
+    def daily_cardiovascular_age(
+        self, **kwargs
+    ) -> OuraResponse[models.DailyCardiovascularAge]:
+        data, metadata = self._fetch("daily_cardiovascular_age", **kwargs)
+        return OuraResponse(
+            data=data, model_type=models.DailyCardiovascularAge, metadata=metadata
+        )
+
+    def daily_readiness(self, **kwargs) -> OuraResponse[models.DailyReadiness]:
+        data, metadata = self._fetch("daily_readiness", **kwargs)
+        return OuraResponse(
+            data=data, model_type=models.DailyReadiness, metadata=metadata
+        )
+
+    def daily_resilience(self, **kwargs) -> OuraResponse[models.DailyResilience]:
+        data, metadata = self._fetch("daily_resilience", **kwargs)
+        return OuraResponse(
+            data=data, model_type=models.DailyResilience, metadata=metadata
+        )
+
     def daily_sleep(self, **kwargs) -> OuraResponse[models.DailySleep]:
-
         data, metadata = self._fetch("daily_sleep", **kwargs)
-
         return OuraResponse(data=data, model_type=models.DailySleep, metadata=metadata)
-
-    def get_sleep_summary(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.SleepSummary | models.SleepSummaryDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="daily_sleep",
-            data_class_name="SleepSummary",
-            datum_class_name="SleepSummaryDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
-
-    def get_readiness_summary(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.ReadinessSummary | models.ReadinessSummaryDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="daily_readiness",
-            data_class_name="ReadinessSummary",
-            datum_class_name="ReadinessSummaryDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
-
-    def get_activity_summary(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.ActivitySummary | models.ActivitySummaryDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="daily_activity",
-            data_class_name="ActivitySummary",
-            datum_class_name="ActivitySummaryDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
 
     def get_heartrate_summary(
         self,
@@ -219,27 +160,6 @@ class OuraClient:
             summary_endpoint="daily_stress",
             data_class_name="StressSummary",
             datum_class_name="StressDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
-
-    def get_resilience_summary(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.ResilienceSummary | models.ResilienceDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="daily_resilience",
-            data_class_name="ResilienceSummary",
-            datum_class_name="ResilienceDatum",
             start=start,
             end=end,
             next_token=next_token,
@@ -408,32 +328,6 @@ class OuraClient:
             summary_endpoint="workout",
             data_class_name="WorkoutData",
             datum_class_name="WorkoutDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
-
-    def get_daily_cardiovascular_age(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> (
-        models.DailyCardiovascularAgeData
-        | models.DailyCardiovascularAgeDatum
-        | JSONValue
-    ):
-        """Get daily cardiovascular-age records or one record by ID."""
-        return self._get_summary_generic(
-            summary_endpoint="daily_cardiovascular_age",
-            data_class_name="DailyCardiovascularAgeData",
-            datum_class_name="DailyCardiovascularAgeDatum",
             start=start,
             end=end,
             next_token=next_token,

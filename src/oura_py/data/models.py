@@ -34,7 +34,7 @@ RingDesign = Literal["heritage", "balance", "balance_diamond", "horizon", "ceram
 RingHardwareType = Literal["gen1", "gen2", "gen2m", "gen3", "gen4", "or5"]
 HeartRateSource = Literal["awake", "workout", "rest", "sleep", "live", "session"]
 StressSummaryType = Literal["restored", "normal", "stressful"]
-ResilienceLevel = Literal["limited", "adequate", "solid", "strong", "exceptional"]
+
 MomentMood = Literal["bad", "worse", "same", "good", "great"]
 MomentType = Literal[
     "breathing", "meditation", "nap", "relaxation", "rest", "body_status"
@@ -66,9 +66,90 @@ WorkoutIntensity = Literal["easy", "moderate", "hard"]
 WorkoutSource = Literal["manual", "autodetected", "confirmed", "workout_heart_rate"]
 
 
+class DailyActivityContributors(OuraModel):
+    meet_daily_targets: int | None = None
+    move_every_hour: int | None = None
+    recovery_time: int | None = None
+    stay_active: int | None = None
+    training_frequency: int | None = None
+    training_volume: int | None = None
+
+
+class DailyActivityMET(OuraModel):
+    interval: float
+    items: list[float | None]
+    timestamp: datetime
+
+
 class DailyActivity(OuraModel):
     id: str
-    # TODO fill in class
+    active_calories: int
+    average_met_minutes: float
+    class_5_min: str | None = None
+    contributors: DailyActivityContributors
+    day: date
+    equivalent_walking_distance: int
+    high_activity_met_minutes: int
+    high_activity_time: int
+    inactivity_alerts: int
+    low_activity_met_minutes: int
+    low_activity_time: int
+    medium_activity_met_minutes: int
+    medium_activity_time: int
+    met: DailyActivityMET
+    meters_to_target: int
+    non_wear_time: int
+    resting_time: int
+    score: int | None = None
+    sedentary_met_minutes: int
+    sedentary_time: int
+    steps: int
+    target_calories: int
+    target_meters: int
+    timestamp: datetime
+    total_calories: int
+
+
+class DailyCardiovascularAge(OuraModel):
+    id: str
+    day: date
+    pulse_wave_velocity: float | None = None
+    vascular_age: int | None = None
+
+
+class DailyReadinessContributors(OuraModel):
+    activity_balance: int | None = None
+    body_temperature: int | None = None
+    hrv_balance: int | None = None
+    previous_day_activity: int | None = None
+    previous_night: int | None = None
+    recovery_index: int | None = None
+    resting_heart_rate: int | None = None
+    sleep_balance: int | None = None
+    sleep_regularity: int | None = None
+
+
+class DailyReadiness(OuraModel):
+    id: str
+    contributors: DailyReadinessContributors
+    day: date
+    score: int | None = None
+    temperature_deviation: float | None = None
+    temperature_trend_deviation: float | None = None
+    timestamp: datetime
+
+
+class DailyResilienceContributors(OuraModel):
+    sleep_recovery: float
+    daytime_recovery: float
+    stress: float
+
+
+class DailyResilience(OuraModel):
+    id: str
+    day: date
+    contributors: DailyResilienceContributors
+    level: Literal["limited", "adequate", "solid", "strong", "exceptional"]
 
 
 class DailySleepContributors(OuraModel):
@@ -113,110 +194,11 @@ class RingConfig(OuraModel):
     data: list[RingConfigData] = Field(default_factory=list)
 
 
-class SleepSummaryContributors(OuraModel):
-    deep_sleep: int | None = None
-    efficiency: int | None = None
-    latency: int | None = None
-    rem_sleep: int | None = None
-    restfulness: int | None = None
-    timing: int | None = None
-    total_sleep: int | None = None
-
-
-class SleepSummaryDatum(OuraModel):
-    id: str
-    contributors: SleepSummaryContributors
-    day: date
-    score: int | None = None
-    timestamp: datetime
-
-
-class SleepSummary(OuraModel):
-    next_token: str | None = None
-    data: list[SleepSummaryDatum] = Field(default_factory=list)
-
-
-class ReadinessSummaryContributors(OuraModel):
-    activity_balance: int | None = None
-    body_temperature: int | None = None
-    hrv_balance: int | None = None
-    previous_day_activity: int | None = None
-    previous_night: int | None = None
-    recovery_index: int | None = None
-    resting_heart_rate: int | None = None
-    sleep_balance: int | None = None
-    sleep_regularity: int | None = None
-
-
 class Readiness(OuraModel):
-    contributors: ReadinessSummaryContributors
+    contributors: object
     score: int | None = None
     temperature_deviation: float | None = None
     temperature_trend_deviation: float | None = None
-
-
-class ReadinessSummaryDatum(OuraModel):
-    id: str
-    contributors: ReadinessSummaryContributors
-    day: date
-    score: int | None = None
-    temperature_deviation: float | None = None
-    temperature_trend_deviation: float | None = None
-    timestamp: datetime
-
-
-class ReadinessSummary(OuraModel):
-    next_token: str | None = None
-    data: list[ReadinessSummaryDatum] = Field(default_factory=list)
-
-
-class ActivitySummaryContributors(OuraModel):
-    meet_daily_targets: int | None = None
-    move_every_hour: int | None = None
-    recovery_time: int | None = None
-    stay_active: int | None = None
-    training_frequency: int | None = None
-    training_volume: int | None = None
-
-
-class ActivitySummaryMET(OuraModel):
-    interval: float
-    items: list[float | None]
-    timestamp: datetime
-
-
-class ActivitySummaryDatum(OuraModel):
-    id: str
-    active_calories: int
-    average_met_minutes: float
-    class_5_min: str | None = None
-    contributors: ActivitySummaryContributors
-    day: date
-    equivalent_walking_distance: int
-    high_activity_met_minutes: int
-    high_activity_time: int
-    inactivity_alerts: int
-    low_activity_met_minutes: int
-    low_activity_time: int
-    medium_activity_met_minutes: int
-    medium_activity_time: int
-    met: ActivitySummaryMET
-    meters_to_target: int
-    non_wear_time: int
-    resting_time: int
-    score: int | None = None
-    sedentary_met_minutes: int
-    sedentary_time: int
-    steps: int
-    target_calories: int
-    target_meters: int
-    timestamp: datetime
-    total_calories: int
-
-
-class ActivitySummary(OuraModel):
-    next_token: str | None = None
-    data: list[ActivitySummaryDatum] = Field(default_factory=list)
 
 
 class HeartRateDatum(OuraModel):
@@ -242,24 +224,6 @@ class StressDatum(OuraModel):
 class StressSummary(OuraModel):
     next_token: str | None = None
     data: list[StressDatum] = Field(default_factory=list)
-
-
-class ResilienceContributors(OuraModel):
-    sleep_recovery: float
-    daytime_recovery: float
-    stress: float
-
-
-class ResilienceDatum(OuraModel):
-    id: str
-    day: date
-    contributors: ResilienceContributors
-    level: ResilienceLevel
-
-
-class ResilienceSummary(OuraModel):
-    next_token: str | None = None
-    data: list[ResilienceDatum] = Field(default_factory=list)
 
 
 class Spo2AggregatedValues(OuraModel):
@@ -423,18 +387,6 @@ class WorkoutDatum(OuraModel):
 class WorkoutData(OuraModel):
     next_token: str | None = None
     data: list[WorkoutDatum] = Field(default_factory=list)
-
-
-class DailyCardiovascularAgeDatum(OuraModel):
-    id: str
-    day: date
-    pulse_wave_velocity: float | None = None
-    vascular_age: int | None = None
-
-
-class DailyCardiovascularAgeData(OuraModel):
-    next_token: str | None = None
-    data: list[DailyCardiovascularAgeDatum] = Field(default_factory=list)
 
 
 class RingBatteryLevelDatum(OuraModel):
