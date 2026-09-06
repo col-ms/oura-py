@@ -84,17 +84,6 @@ class OuraClient:
         )
         self._response_format = response_format
 
-    def _get_model_classes(self):
-        if self._response_format == "raw":
-            return None
-        try:
-            from oura_py.data import models
-        except ImportError as exception:
-            raise ImportError("""
-                "Model responses require optional dependency. Install with `pip install "oura-py[models]"`
-            """) from exception
-        return models
-
     def daily_activity(self, **kwargs) -> OuraResponse[models.DailyActivity]:
         data, metadata = self._fetch("daily_sleep", **kwargs)
         return OuraResponse(
@@ -125,110 +114,38 @@ class OuraClient:
         data, metadata = self._fetch("daily_sleep", **kwargs)
         return OuraResponse(data=data, model_type=models.DailySleep, metadata=metadata)
 
-    def get_heartrate_summary(
-        self,
-        start_datetime: str | None = None,
-        end_datetime: str | None = None,
-        next_token: str | None = None,
-        latest: bool | None = None,
-        fields: str | None = None,
-    ) -> models.HeartRateSummary | models.HeartRateDatum | JSONValue:
-        params = self._compact_params(
-            start_datetime=start_datetime,
-            end_datetime=end_datetime,
-            next_token=next_token,
-            latest=latest,
-            fields=fields,
-        )
-        result = self._manager.get("heartrate", params=params)
-        if self._response_format == "raw":
-            return result.data
+    def daily_spo2(self, **kwargs) -> OuraResponse[models.DailySpo2]:
+        data, metadata = self._fetch("daily_spo2", **kwargs)
+        return OuraResponse(data=data, model_type=models.DailySpo2, metadata=metadata)
 
-        models = self._get_model_classes()
-        return models.HeartRateSummary.model_validate(result.data)
+    def daily_stress(self, **kwargs) -> OuraResponse[models.DailyStress]:
+        data, metadata = self._fetch("daily_stress", **kwargs)
+        return OuraResponse(data=data, model_type=models.DailyStress, metadata=metadata)
 
-    def get_stress_summary(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.StressSummary | models.StressDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="daily_stress",
-            data_class_name="StressSummary",
-            datum_class_name="StressDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
+    def enhanced_tag(self, **kwargs) -> OuraResponse[models.EnhancedTag]:
+        data, metadata = self._fetch("enhanced_tag", **kwargs)
+        return OuraResponse(data=data, model_type=models.EnhancedTag, metadata=metadata)
+
+    def heartrate(self, **kwargs) -> OuraResponse[models.Heartrate]:
+        data, metadata = self._fetch("heartrate", **kwargs)
+        return OuraResponse(data=data, model_type=models.Heartrate, metadata=metadata)
+
+    def personal_info(self, **kwargs) -> OuraResponse[models.PersonalInfo]:
+        data, metadata = self._fetch("personal_info", **kwargs)
+        return OuraResponse(
+            data=data, model_type=models.PersonalInfo, metadata=metadata
         )
 
-    def get_spo2_summary(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.Spo2Summary | models.Spo2Datum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="daily_spo2",
-            data_class_name="Spo2Summary",
-            datum_class_name="Spo2Datum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
+    def rest_mode_periods(self, **kwargs) -> OuraResponse[models.RestModePeriod]:
+        data, metadata = self._fetch("rest_mode_period", **kwargs)
+        return OuraResponse(
+            data=data, model_type=models.RestModePeriod, metadata=metadata
         )
 
-    def get_tags_summary(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.TagSummary | models.TagDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="enhanced_tag",
-            data_class_name="TagSummary",
-            datum_class_name="TagDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
-
-    def get_rest_mode_periods(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.RestModePeriodSummary | models.RestModePeriodDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="rest_mode_period",
-            data_class_name="RestModePeriodSummary",
-            datum_class_name="RestModePeriodDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
+    def ring_configuration(self, **kwargs) -> OuraResponse[models.RingConfiguration]:
+        data, metadata = self._fetch("ring_configuration", **kwargs)
+        return OuraResponse(
+            data=data, model_type=models.RingConfiguration, metadata=metadata
         )
 
     def get_session_data(
@@ -433,38 +350,6 @@ class OuraClient:
             f"../webhook/subscription/renew/{subscription_id}"
         )
         return result.data
-
-    def get_personal_info(
-        self, response_format: ResponseFormat | None = None
-    ) -> models.PersonalInfo | JSONValue:
-        result = self._manager.get("personal_info")
-        response_format = response_format or self._response_format
-        if response_format == "raw":
-            return result.data
-
-        models = self._get_model_classes()
-        return models.PersonalInfo.model_validate(result.data)
-
-    def get_ring_config(
-        self,
-        document_id: str | None = None,
-        next_token: str | None = None,
-        fields: str | None = None,
-    ) -> models.RingConfig | JSONValue:
-        if document_id and next_token:
-            raise ValueError(DOC_ID_ERR_MSG)
-        endpoint = (
-            "ring_configuration"
-            if document_id is None
-            else f"ring_configuration/{document_id}"
-        )
-        params = self._compact_params(next_token=next_token, fields=fields)
-        result = self._manager.get(endpoint=endpoint, params=params)
-        if self._response_format == "raw":
-            return result.data
-
-        models = self._get_model_classes()
-        return models.RingConfig.model_validate(result.data)
 
     def _get_raw_collection(
         self,

@@ -22,7 +22,7 @@ if __name__ == "__main__":
         response_format="models",
     )
 
-    result = client.daily_sleep(start_date="2026-07-01", fields=["day", "score"])
+    result = client.daily_spo2(start_date="2026-07-01", fields=["day", "score"])
     pprint(result.raw())
 
     log.info("Exiting...")

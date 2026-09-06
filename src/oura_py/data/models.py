@@ -12,29 +12,6 @@ class OuraModel(BaseModel):
     model_config = ConfigDict(extra="ignore", validate_assignment=True)
 
 
-RingColor = Literal[
-    "brushed_silver",
-    "glossy_black",
-    "glossy_gold",
-    "glossy_white",
-    "gucci",
-    "matt_gold",
-    "rose",
-    "silver",
-    "stealth_black",
-    "titanium",
-    "titanium_and_gold",
-    "cloud",
-    "petal",
-    "midnight",
-    "tide",
-    "deep_rose",
-]
-RingDesign = Literal["heritage", "balance", "balance_diamond", "horizon", "ceramic"]
-RingHardwareType = Literal["gen1", "gen2", "gen2m", "gen3", "gen4", "or5"]
-HeartRateSource = Literal["awake", "workout", "rest", "sleep", "live", "session"]
-StressSummaryType = Literal["restored", "normal", "stressful"]
-
 MomentMood = Literal["bad", "worse", "same", "good", "great"]
 MomentType = Literal[
     "breathing", "meditation", "nap", "relaxation", "rest", "body_status"
@@ -170,79 +147,26 @@ class DailySleep(OuraModel):
     timestamp: datetime
 
 
-class PersonalInfo(OuraModel):
-    id: str
-    age: int | None = None
-    weight: float | None = None
-    height: float | None = None
-    biological_sex: str | None = None
-    email: str | None = None
-
-
-class RingConfigData(OuraModel):
-    id: str
-    color: RingColor | None = None
-    design: RingDesign | None = None
-    firmware_version: str | None = None
-    hardware_type: RingHardwareType | None = None
-    set_up_at: datetime | None = None
-    size: int | None = None
-
-
-class RingConfig(OuraModel):
-    next_token: str | None = None
-    data: list[RingConfigData] = Field(default_factory=list)
-
-
-class Readiness(OuraModel):
-    contributors: object
-    score: int | None = None
-    temperature_deviation: float | None = None
-    temperature_trend_deviation: float | None = None
-
-
-class HeartRateDatum(OuraModel):
-    timestamp: datetime
-    timestamp_unix: int
-    bpm: int
-    source: HeartRateSource
-
-
-class HeartRateSummary(OuraModel):
-    next_token: str | None = None
-    data: list[HeartRateDatum] = Field(default_factory=list)
-
-
-class StressDatum(OuraModel):
-    id: str
-    day: date
-    day_summary: StressSummaryType | None = None
-    stress_high: int | None = None
-    recovery_high: int | None = None
-
-
-class StressSummary(OuraModel):
-    next_token: str | None = None
-    data: list[StressDatum] = Field(default_factory=list)
-
-
 class Spo2AggregatedValues(OuraModel):
     average: float
 
 
-class Spo2Datum(OuraModel):
+class DailySpo2(OuraModel):
     id: str
+    breathing_disturbance_index: int | None = None
     day: date
     spo2_percentage: Spo2AggregatedValues | None = None
-    breathing_disturbance_index: int | None = None
 
 
-class Spo2Summary(OuraModel):
-    next_token: str | None = None
-    data: list[Spo2Datum] = Field(default_factory=list)
+class DailyStress(OuraModel):
+    id: str
+    day: date
+    day_summary: Literal["restored", "normal", "stressful"] | None = None
+    stress_high: int | None = None
+    recovery_high: int | None = None
 
 
-class TagDatum(OuraModel):
+class EnhancedTag(OuraModel):
     id: str
     tag_type_code: str | None = None
     start_time: datetime
@@ -253,9 +177,20 @@ class TagDatum(OuraModel):
     custom_name: str | None = None
 
 
-class TagSummary(OuraModel):
-    next_token: str | None = None
-    data: list[TagDatum] = Field(default_factory=list)
+class Heartrate(OuraModel):
+    timestamp: datetime
+    timestamp_unix: int
+    bpm: int
+    source: Literal["awake", "workout", "rest", "sleep", "live", "session"]
+
+
+class PersonalInfo(OuraModel):
+    id: str
+    age: int | None = None
+    weight: float | None = None
+    height: float | None = None
+    biological_sex: str | None = None
+    email: str | None = None
 
 
 class RestModeEpisodes(OuraModel):
@@ -263,7 +198,7 @@ class RestModeEpisodes(OuraModel):
     timestamp: datetime
 
 
-class RestModePeriodDatum(OuraModel):
+class RestModePeriod(OuraModel):
     id: str
     end_day: date | None = None
     end_time: datetime | None = None
@@ -272,9 +207,43 @@ class RestModePeriodDatum(OuraModel):
     start_time: datetime | None = None
 
 
-class RestModePeriodSummary(OuraModel):
-    next_token: str | None = None
-    data: list[RestModePeriodDatum] = Field(default_factory=list)
+class RingConfiguration(OuraModel):
+    id: str
+    color: (
+        Literal[
+            "brushed_silver",
+            "glossy_black",
+            "glossy_gold",
+            "glossy_white",
+            "gucci",
+            "matt_gold",
+            "rose",
+            "silver",
+            "stealth_black",
+            "titanium",
+            "titanium_and_gold",
+            "cloud",
+            "petal",
+            "midnight",
+            "tide",
+            "deep_rose",
+        ]
+        | None
+    ) = None
+    design: (
+        Literal["heritage", "balance", "balance_diamond", "horizon", "ceramic"] | None
+    ) = None
+    firmware_version: str | None = None
+    hardware_type: Literal["gen1", "gen2", "gen2m", "gen3", "gen4", "or5"] | None = None
+    set_up_at: datetime | None = None
+    size: int | None = None
+
+
+class Readiness(OuraModel):
+    contributors: object
+    score: int | None = None
+    temperature_deviation: float | None = None
+    temperature_trend_deviation: float | None = None
 
 
 class SessionMeasureInfo(OuraModel):
