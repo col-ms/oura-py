@@ -12,18 +12,6 @@ class OuraModel(BaseModel):
     model_config = ConfigDict(extra="ignore", validate_assignment=True)
 
 
-MomentMood = Literal["bad", "worse", "same", "good", "great"]
-MomentType = Literal[
-    "breathing", "meditation", "nap", "relaxation", "rest", "body_status"
-]
-SleepAlgorithmVersion = Literal["v1", "v2"]
-SleepAnalysisReason = Literal[
-    "foreground_sleep_analysis",
-    "bedtime_edit",
-    "background_sleep_analysis",
-    "background_created_foreground_updated",
-]
-SleepType = Literal["deleted", "sleep", "long_sleep", "late_nap", "rest"]
 SleepTimeRecommendation = Literal[
     "improve_efficiency",
     "earlier_bedtime",
@@ -94,7 +82,7 @@ class DailyCardiovascularAge(OuraModel):
     vascular_age: int | None = None
 
 
-class DailyReadinessContributors(OuraModel):
+class ReadinessContributors(OuraModel):
     activity_balance: int | None = None
     body_temperature: int | None = None
     hrv_balance: int | None = None
@@ -106,13 +94,16 @@ class DailyReadinessContributors(OuraModel):
     sleep_regularity: int | None = None
 
 
-class DailyReadiness(OuraModel):
-    id: str
-    contributors: DailyReadinessContributors
-    day: date
+class Readiness(OuraModel):
+    contributors: ReadinessContributors
     score: int | None = None
     temperature_deviation: float | None = None
     temperature_trend_deviation: float | None = None
+
+
+class DailyReadiness(Readiness):
+    id: str
+    day: date
     timestamp: datetime
 
 
@@ -239,37 +230,25 @@ class RingConfiguration(OuraModel):
     size: int | None = None
 
 
-class Readiness(OuraModel):
-    contributors: object
-    score: int | None = None
-    temperature_deviation: float | None = None
-    temperature_trend_deviation: float | None = None
-
-
-class SessionMeasureInfo(OuraModel):
+class GenericMeasureInfo(OuraModel):
     interval: float
     items: list[float | None]
     timestamp: datetime
 
 
-class SessionDatum(OuraModel):
+class Session(OuraModel):
     id: str
     day: date
     start_datetime: datetime
     end_datetime: datetime
-    type: MomentType
-    heart_rate: SessionMeasureInfo | None = None
-    heart_rate_variability: SessionMeasureInfo | None = None
-    mood: MomentMood | None = None
-    motion_count: SessionMeasureInfo | None = None
+    type: Literal["breathing", "meditation", "nap", "relaxation", "rest", "body_status"]
+    heart_rate: GenericMeasureInfo | None = None
+    heart_rate_variability: GenericMeasureInfo | None = None
+    mood: Literal["bad", "worse", "same", "good", "great"] | None = None
+    motion_count: GenericMeasureInfo | None = None
 
 
-class SessionData(OuraModel):
-    next_token: str | None = None
-    data: list[SessionDatum] = Field(default_factory=list)
-
-
-class SleepDetailDatum(OuraModel):
+class Sleep(OuraModel):
     id: str
     average_breath: float | None = None
     average_heart_rate: float | None = None
@@ -280,8 +259,8 @@ class SleepDetailDatum(OuraModel):
     day: date
     deep_sleep_duration: int | None = None
     efficiency: int | None = None
-    heart_rate: SessionMeasureInfo | None = None
-    hrv: SessionMeasureInfo | None = None
+    heart_rate: GenericMeasureInfo | None = None
+    hrv: GenericMeasureInfo | None = None
     latency: int | None = None
     light_sleep_duration: int | None = None
     low_battery_alert: bool
@@ -292,21 +271,24 @@ class SleepDetailDatum(OuraModel):
     readiness_score_delta: int | None = None
     rem_sleep_duration: int | None = None
     restless_periods: int | None = None
-    sleep_algorithm_version: SleepAlgorithmVersion | None = None
-    sleep_analysis_reason: SleepAnalysisReason | None = None
+    sleep_algorithm_version: Literal["v1", "v2"] | None = None
+    sleep_analysis_reason: (
+        Literal[
+            "foreground_sleep_analysis",
+            "bedtime_edit",
+            "background_sleep_analysis",
+            "background_created_foreground_updated",
+        ]
+        | None
+    ) = None
     sleep_phase_30_sec: str | None = None
     sleep_phase_5_min: str | None = None
     sleep_score_delta: int | None = None
     time_in_bed: int
     total_sleep_duration: int | None = None
-    type: SleepType | None = None
+    type: Literal["deleted", "sleep", "long_sleep", "late_nap", "rest"] | None = None
     ring_id: str | None = None
     app_sleep_phase_5_min: str | None = None
-
-
-class SleepDetailData(OuraModel):
-    next_token: str | None = None
-    data: list[SleepDetailDatum] = Field(default_factory=list)
 
 
 class SleepTimeWindow(OuraModel):
@@ -315,17 +297,31 @@ class SleepTimeWindow(OuraModel):
     start_offset: int
 
 
-class SleepTimeDatum(OuraModel):
+class SleepTime(OuraModel):
     id: str
     day: date
     optimal_bedtime: SleepTimeWindow | None = None
-    recommendation: SleepTimeRecommendation | None = None
-    status: SleepTimeStatus | None = None
-
-
-class SleepTimeData(OuraModel):
-    next_token: str | None = None
-    data: list[SleepTimeDatum] = Field(default_factory=list)
+    recommendation: (
+        Literal[
+            "improve_efficiency",
+            "earlier_bedtime",
+            "later_bedtime",
+            "earlier_wake_up_time",
+            "later_wake_up_time",
+            "follow_optimal_bedtime",
+        ]
+        | None
+    ) = None
+    status: (
+        Literal[
+            "not_enough_nights",
+            "not_enough_recent_nights",
+            "bad_sleep_quality",
+            "only_recommended_found",
+            "optimal_found",
+        ]
+        | None
+    ) = None
 
 
 class VO2MaxDatum(OuraModel):

@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from oura_py.client.oura_client import OuraClient
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     log = logging.getLogger(__name__)
     load_dotenv()
     client_id = os.environ["CLIENT_ID"]
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         response_format="models",
     )
 
-    result = client.daily_spo2(start_date="2026-07-01", fields=["day", "score"])
+    result = client.session(start_date="2022-07-01")
     pprint(result.raw())
 
     log.info("Exiting...")

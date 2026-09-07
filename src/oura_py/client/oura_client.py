@@ -148,68 +148,17 @@ class OuraClient:
             data=data, model_type=models.RingConfiguration, metadata=metadata
         )
 
-    def get_session_data(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.SessionData | models.SessionDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="session",
-            data_class_name="SessionData",
-            datum_class_name="SessionDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
+    def session(self, **kwargs) -> OuraResponse[models.Session]:
+        data, metadata = self._fetch("session", **kwargs)
+        return OuraResponse(data=data, model_type=models.Session, metadata=metadata)
 
-    def get_sleep_detail(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.SleepDetailData | models.SleepDetailDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="sleep",
-            data_class_name="SleepDetailData",
-            datum_class_name="SleepDetailDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
+    def sleep(self, **kwargs) -> OuraResponse[models.Sleep]:
+        data, metadata = self._fetch("sleep", **kwargs)
+        return OuraResponse(data=data, model_type=models.Sleep, metadata=metadata)
 
-    def get_sleep_times(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.SleepTimeData | models.SleepTimeDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="sleep_time",
-            data_class_name="SleepTimeData",
-            datum_class_name="SleepTimeDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
+    def sleep_time(self, **kwargs) -> OuraResponse[models.SleepTime]:
+        data, metadata = self._fetch("sleep_time", **kwargs)
+        return OuraResponse(data=data, model_type=models.SleepTime, metadata=metadata)
 
     def get_vo2_max(
         self,
