@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 
 class OuraModel(BaseModel):
@@ -324,37 +324,27 @@ class SleepTime(OuraModel):
     ) = None
 
 
-class VO2MaxDatum(OuraModel):
+class VO2Max(OuraModel):
     id: str
     day: date
     timestamp: datetime
     vo2_max: int
 
 
-class VO2MaxData(OuraModel):
-    next_token: str | None = None
-    data: list[VO2MaxDatum] = Field(default_factory=list)
-
-
-class WorkoutDatum(OuraModel):
+class Workout(OuraModel):
     id: str
     activity: str
     calories: float | None = None
     day: date
     distance: float | None = None
     end_datetime: datetime
-    intensity: WorkoutIntensity
+    intensity: Literal["easy", "moderate", "hard"]
     label: str | None = None
-    source: WorkoutSource
+    source: Literal["manual", "autodetected", "confirmed", "workout_heart_rate"]
     start_datetime: datetime
 
 
-class WorkoutData(OuraModel):
-    next_token: str | None = None
-    data: list[WorkoutDatum] = Field(default_factory=list)
-
-
-class RingBatteryLevelDatum(OuraModel):
+class RingBatteryLevel(OuraModel):
     timestamp: datetime
     timestamp_unix: int
     charging: bool | None = None
@@ -362,54 +352,27 @@ class RingBatteryLevelDatum(OuraModel):
     level: int
 
 
-class RingBatteryLevelData(OuraModel):
-    next_token: str | None = None
-    data: list[RingBatteryLevelDatum] = Field(default_factory=list)
-
-
-class BasicTagDatum(OuraModel):
-    id: str
-    day: date
-    text: str | None = None
-    timestamp: datetime
-    tags: list[str]
-
-
-class BasicTagData(OuraModel):
-    next_token: str | None = None
-    data: list[BasicTagDatum] = Field(default_factory=list)
-
-
-WebhookOperation = Literal["create", "update", "delete"]
-WebhookDataType = Literal[
-    "tag",
-    "enhanced_tag",
-    "workout",
-    "session",
-    "sleep",
-    "daily_sleep",
-    "daily_readiness",
-    "daily_activity",
-    "daily_spo2",
-    "sleep_time",
-    "rest_mode_period",
-    "ring_configuration",
-    "daily_stress",
-    "daily_cardiovascular_age",
-    "daily_resilience",
-    "vo2_max",
-    "meal",
-]
-
-
-class WebhookSubscriptionModel(OuraModel):
+class WebhookSubscription(OuraModel):
     id: str
     callback_url: str
-    event_type: WebhookOperation
-    data_type: WebhookDataType
+    event_type: Literal["create", "update", "delete"]
+    data_type: Literal[
+        "tag",
+        "enhanced_tag",
+        "workout",
+        "session",
+        "sleep",
+        "daily_sleep",
+        "daily_readiness",
+        "daily_activity",
+        "daily_spo2",
+        "sleep_time",
+        "rest_mode_period",
+        "ring_configuration",
+        "daily_stress",
+        "daily_cardiovascular_age",
+        "daily_resilience",
+        "vo2_max",
+        "meal",
+    ]
     expiration_time: str
-
-
-class WebhookSubscriptions(OuraModel):
-    data: list[WebhookSubscriptionModel] = Field(default_factory=list)
-    next_token: str | None = None

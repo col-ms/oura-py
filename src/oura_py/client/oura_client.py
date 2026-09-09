@@ -9,9 +9,8 @@ from typing import Any, Literal
 from oura_py.auth.oauth_manager import OuraOAuth2Client
 from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
 from oura_py.client.request_manager import RequestManager
-from oura_py.constants import DOC_ID_ERR_MSG, WebhookDataType
+from oura_py.constants import WebhookDataType
 from oura_py.data import models
-from oura_py.data.exceptions import OuraPyException
 from oura_py.data.response import JSONValue, OuraResponse
 
 ResponseFormat = Literal["raw", "models"]
@@ -160,96 +159,23 @@ class OuraClient:
         data, metadata = self._fetch("sleep_time", **kwargs)
         return OuraResponse(data=data, model_type=models.SleepTime, metadata=metadata)
 
-    def get_vo2_max(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.VO2MaxData | models.VO2MaxDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="vO2_max",
-            data_class_name="VO2MaxData",
-            datum_class_name="VO2MaxDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
+    def vo2_max(self, **kwargs) -> OuraResponse[models.VO2Max]:
+        data, metadata = self._fetch("vo2_max", **kwargs)
+        return OuraResponse(data=data, model_type=models.VO2Max, metadata=metadata)
 
-    def get_workouts(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.WorkoutData | models.WorkoutDatum | JSONValue:
-        return self._get_summary_generic(
-            summary_endpoint="workout",
-            data_class_name="WorkoutData",
-            datum_class_name="WorkoutDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
-        )
+    def workout(self, **kwargs) -> OuraResponse[models.Workout]:
+        data, metadata = self._fetch("workout", **kwargs)
+        return OuraResponse(data=data, model_type=models.Workout, metadata=metadata)
 
-    def get_ring_battery_level(
-        self,
-        start_datetime: str | None = None,
-        end_datetime: str | None = None,
-        next_token: str | None = None,
-        latest: bool | None = None,
-        fields: str | None = None,
-    ) -> models.RingBatteryLevelData | JSONValue:
-        """Get ring battery-level time-series data."""
-        params = self._compact_params(
-            start_datetime=start_datetime,
-            end_datetime=end_datetime,
-            next_token=next_token,
-            latest=latest,
-            fields=fields,
-        )
-        result = self._manager.get("ring_battery_level", params=params)
-        if self._response_format == "raw":
-            return result.data
-
-        models = self._get_model_classes()
-        return models.RingBatteryLevelData.model_validate(result.data)
-
-    def get_tag(
-        self,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> models.BasicTagData | models.BasicTagDatum | JSONValue:
-        """Get basic tag records or one record by ID."""
-        return self._get_summary_generic(
-            summary_endpoint="tag",
-            data_class_name="BasicTagData",
-            datum_class_name="BasicTagDatum",
-            start=start,
-            end=end,
-            next_token=next_token,
-            document_id=document_id,
-            fields=fields,
-            response_format=response_format,
+    def ring_battery_level(self, **kwargs) -> OuraResponse[models.RingBatteryLevel]:
+        data, metadata = self._fetch("ring_battery_level", **kwargs)
+        return OuraResponse(
+            data=data, model_type=models.RingBatteryLevel, metadata=metadata
         )
 
     def get_webhook_subscriptions(
         self,
-    ) -> models.WebhookSubscriptions | JSONValue:
+    ) -> models.WebhookSubscription | JSONValue:
         """List the application's webhook subscriptions."""
         result = self._manager.webhook_get("../webhook/subscription")
         if self._response_format == "raw":
@@ -300,39 +226,11 @@ class OuraClient:
         )
         return result.data
 
-    def _get_raw_collection(
-        self,
-        endpoint: str,
-        start: str | None,
-        end: str | None,
-        next_token: str | None,
-        document_id: str | None,
-        fields: str | None,
-    ) -> JSONValue:
-        if document_id and next_token:
-            raise ValueError(DOC_ID_ERR_MSG)
-        if document_id:
-            result = self._manager.get(f"{endpoint}/{document_id}")
-            return result.data
-        start_date, end_date = self._prep_dates(start, end)
-        params = self._compact_params(
-            start_date=start_date,
-            end_date=end_date,
-            next_token=next_token,
-            fields=fields,
-        )
-        result = self._manager.get(endpoint, params=params)
-        return result.data
-
     def _fetch(
         self, endpoint: str, **kwargs: Any
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
 
-        today = dt.datetime.now(dt.UTC).date()
-
-        kwargs.setdefault("end_date", today.isoformat())
-        kwargs.setdefault("start_date", (today - timedelta(days=1)).isoformat())
-
+        kwargs = self._set_default_dates(kwargs)
         params = self._compact_params(**kwargs)
 
         records: list[dict[str, Any]] = []
@@ -357,71 +255,25 @@ class OuraClient:
 
         return records, metadata
 
-    def _get_summary_generic(
-        self,
-        summary_endpoint: str,
-        data_class_name: str,
-        datum_class_name: str,
-        start: str | None = None,
-        end: str | None = None,
-        next_token: str | None = None,
-        document_id: str | None = None,
-        fields: str | None = None,
-        response_format: ResponseFormat | None = None,
-    ) -> JSONValue:
-        if document_id and next_token:
-            raise ValueError(DOC_ID_ERR_MSG)
+    @staticmethod
+    def _set_default_dates(**kwargs: dict[str, Any]) -> dict[str, Any]:
+        end_date = kwargs.get("end_date")
+        start_date = kwargs.get("start_date")
 
-        response_format = response_format or self._response_format
+        if end_date is None:
+            end_date = dt.datetime.now(dt.UTC).date().isoformat()
 
-        if document_id:
-            result = self._manager.get(f"{summary_endpoint}/{document_id}")
-            if response_format == "raw":
-                return result.data
+        if start_date is None:
+            start_date = (
+                dt.date.fromisoformat(end_date) - timedelta(days=1)
+            ).isoformat()
 
-            models = self._get_model_classes()
-            datum_class = getattr(models, datum_class_name)
-            return datum_class.model_validate(result.data)
+        kwargs["start_date"] = start_date
+        kwargs["end_date"] = end_date
 
-        start_date, end_date = self._prep_dates(start, end)
-        params = self._compact_params(
-            start_date=start_date,
-            end_date=end_date,
-            next_token=next_token,
-            fields=fields,
-        )
-        result = self._manager.get(
-            f"{summary_endpoint}",
-            params=params,
-        )
-
-        if response_format == "raw":
-            return result.data
-
-        models = self._get_model_classes()
-        data_class = getattr(models, data_class_name)
-        return data_class.model_validate(result.data)
-
-    def _prep_dates(
-        self, start_date: str | None = None, end_date: str | None = None
-    ) -> tuple[str, str]:
-        end = (
-            dt.datetime.date.fromisoformat(end_date)
-            if end_date
-            else dt.datetime.now(tz=dt.UTC).date()
-        )
-        start = (
-            dt.datetime.date.fromisoformat(start_date)
-            if start_date
-            else end - timedelta(days=1)
-        )
-        if start > end:
-            log_msg = f"Start date must be before end date. Provided start: {start_date}, end: {end_date}"
-            self._logger.error(msg=log_msg)
-            raise OuraPyException("Start date must be before end date.")
-        return str(start), str(end)
+        return kwargs
 
     @staticmethod
-    def _compact_params(**params: object) -> dict:
+    def _compact_params(**params: dict[str, Any]) -> dict[str, Any]:
         """Remove unset optional query parameters before sending a request."""
         return {key: value for key, value in params.items() if value is not None}
