@@ -44,7 +44,7 @@ class OuraResponse[T]:
     ):
         self._data = data
         self._model_type = model_type
-        self._metadata = metadata
+        self._metadata = metadata or {}
 
         self._model_cache: T | list[T] | None = None
         self._polars_cache: None = None
@@ -56,7 +56,7 @@ class OuraResponse[T]:
         if self._model_type is None:
             raise TypeError("No data model defined for this response")
 
-        if self._model_cache:
+        if self._model_cache is not None:
             return self._model_cache
 
         if isinstance(self._data, list):
