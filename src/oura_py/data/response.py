@@ -47,7 +47,6 @@ class OuraResponse[T]:
         self._metadata = metadata or {}
 
         self._model_cache: T | list[T] | None = None
-        self._polars_cache: None = None
 
     def raw(self) -> Any:
         return self._data
@@ -69,10 +68,10 @@ class OuraResponse[T]:
         return self._model_cache
 
     def to_polars(self):
-        raise NotImplementedError("Polars conversion yet to be implemented")
+        raise NotImplementedError("Polars conversion planned for a future release")
 
     def to_pandas(self):
-        raise NotImplementedError("Pandas conversion yet to be implemented")
+        raise NotImplementedError("Pandas conversion planned for a future release")
 
     @property
     def metadata(self) -> dict[str, Any]:

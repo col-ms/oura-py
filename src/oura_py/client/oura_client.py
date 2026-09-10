@@ -255,6 +255,7 @@ class OuraClient:
 
         kwargs = self._set_default_dates(**kwargs)
         params = self._compact_params(**kwargs)
+        request_params = params.copy()
 
         records: list[dict[str, Any]] = []
         next_token: str | None = None
@@ -273,7 +274,7 @@ class OuraClient:
 
         metadata = {
             "endpoint": endpoint,
-            "params": params,
+            "params": request_params,
         }
 
         return records, metadata
