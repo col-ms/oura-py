@@ -56,7 +56,12 @@ class RequestManager:
             token_updater=token_updater,
         )
 
-    def get(self, endpoint: str, params: dict | None = None) -> Result:
+    def get(
+        self,
+        endpoint: str,
+        params: dict | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Result:
         """Sends a GET request to the specified endpoint with optional parameters.
 
         Args:
@@ -66,10 +71,16 @@ class RequestManager:
         Returns:
             Result: The result of the GET request.
         """
-        return self._request(method="GET", endpoint=endpoint, params=params)
+        return self._request(
+            method="GET", endpoint=endpoint, params=params, headers=headers
+        )
 
     def post(
-        self, endpoint: str, params: dict | None = None, data: dict | None = None
+        self,
+        endpoint: str,
+        params: dict | None = None,
+        data: dict | None = None,
+        headers: dict[str, str] | None = None,
     ) -> Result:
         """
         Sends a POST request to the specified endpoint with the given parameters and data.
@@ -82,47 +93,24 @@ class RequestManager:
         Returns:
             Result: The result of the POST request.
         """
-        return self._request(method="POST", endpoint=endpoint, params=params, data=data)
+        return self._request(
+            method="POST", endpoint=endpoint, params=params, data=data, headers=headers
+        )
 
-    def put(self, endpoint: str, data: dict | None = None) -> Result:
+    def put(
+        self,
+        endpoint: str,
+        data: dict | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> Result:
         """Send a JSON PUT request to an API endpoint."""
-        return self._request(method="PUT", endpoint=endpoint, data=data)
+        return self._request(
+            method="PUT", endpoint=endpoint, data=data, headers=headers
+        )
 
-    def delete(self, endpoint: str) -> Result:
+    def delete(self, endpoint: str, headers: dict[str, str] | None = None) -> Result:
         """Send a DELETE request to an API endpoint."""
-        return self._request(method="DELETE", endpoint=endpoint)
-
-    def webhook_get(self, endpoint: str) -> Result:
-        """Send a webhook-management GET using client credential headers."""
-        return self._request(
-            method="GET", endpoint=endpoint, headers=self._webhook_headers()
-        )
-
-    def webhook_post(self, endpoint: str, data: dict) -> Result:
-        """Send a webhook-management POST using client credential headers."""
-        return self._request(
-            method="POST", endpoint=endpoint, data=data, headers=self._webhook_headers()
-        )
-
-    def webhook_put(self, endpoint: str, data: dict | None = None) -> Result:
-        """Send a webhook-management PUT using client credential headers."""
-        return self._request(
-            method="PUT", endpoint=endpoint, data=data, headers=self._webhook_headers()
-        )
-
-    def webhook_delete(self, endpoint: str) -> Result:
-        """Send a webhook-management DELETE using client credential headers."""
-        return self._request(
-            method="DELETE", endpoint=endpoint, headers=self._webhook_headers()
-        )
-
-    def _webhook_headers(self) -> dict[str, str]:
-        if not self._client_secret:
-            raise ValueError("client_secret is required for webhook operations")
-        return {
-            "x-client-id": self._client_id,
-            "x-client-secret": self._client_secret,
-        }
+        return self._request(method="DELETE", endpoint=endpoint, headers=headers)
 
     def _request(
         self,

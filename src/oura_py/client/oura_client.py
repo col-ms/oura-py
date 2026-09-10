@@ -9,9 +9,9 @@ from typing import Any, Literal
 from oura_py.auth.oauth_manager import OuraOAuth2Client
 from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
 from oura_py.client.request_manager import RequestManager
-from oura_py.constants import WebhookDataType
+from oura_py.constants import WEBHOOK_PATH, WebhookDataType
 from oura_py.data import models
-from oura_py.data.response import JSONValue, OuraResponse
+from oura_py.data.response import OuraResponse
 
 ResponseFormat = Literal["raw", "models"]
 
@@ -38,7 +38,6 @@ class OuraClient:
         redirect_uri: str | None = None,
         ssl_verify: bool = True,
         logger: logging.Logger | None = None,
-        response_format: ResponseFormat = "raw",
     ):
         """Initialize an authenticated Oura API client.
 
@@ -58,8 +57,6 @@ class OuraClient:
             response_format: Whether to return raw API response or data models.
                 Usage of "models" requires oura-py[models] to be installed.
         """
-        if response_format not in {"raw", "models"}:
-            raise ValueError("response_format must be 'raw' or 'models'")
 
         self._logger = logger or logging.getLogger(__name__)
         if token is None:
@@ -81,10 +78,11 @@ class OuraClient:
             ssl_verify=ssl_verify,
             logger=self._logger,
         )
-        self._response_format = response_format
+        self._client_id = client_id
+        self._client_secret = client_secret
 
     def daily_activity(self, **kwargs) -> OuraResponse[models.DailyActivity]:
-        data, metadata = self._fetch("daily_sleep", **kwargs)
+        data, metadata = self._fetch("daily_activity", **kwargs)
         return OuraResponse(
             data=data, model_type=models.DailyActivity, metadata=metadata
         )
@@ -173,58 +171,81 @@ class OuraClient:
             data=data, model_type=models.RingBatteryLevel, metadata=metadata
         )
 
-    def get_webhook_subscriptions(
+    def list_webhook_subscriptions(
         self,
-    ) -> models.WebhookSubscription | JSONValue:
+    ) -> OuraResponse[models.WebhookSubscription]:
         """List the application's webhook subscriptions."""
-        result = self._manager.webhook_get("../webhook/subscription")
-        if self._response_format == "raw":
-            return result.data
+        result = self._manager.get(
+            endpoint=WEBHOOK_PATH, headers=self._webhook_headers()
+        )
+        return OuraResponse(
+            data=result.data.get("data", []),
+            model_type=models.WebhookSubscription,
+            metadata={"endpoint": WEBHOOK_PATH},
+        )
 
-        models = self._get_model_classes()
-        return models.WebhookSubscriptions.model_validate(result.data)
+    def get_webhook_subscription(
+        self, subscription_id: str
+    ) -> OuraResponse[models.WebhookSubscription]:
+        """Get one webhook subscription by ID."""
+        result = self._manager.get(f"{WEBHOOK_PATH}/{subscription_id}")
+        return OuraResponse(
+            data=result.data.get("data", []),
+            model_type=models.WebhookSubscription,
+            metadata={"endpoint": f"{WEBHOOK_PATH}/{subscription_id}"},
+        )
 
-    def create_webhook_subscription(self, data: dict) -> JSONValue:
+    def create_webhook_subscription(
+        self, data: dict[str, str]
+    ) -> OuraResponse[models.WebhookSubscription]:
         """Create a webhook subscription from an OpenAPI request payload."""
         payload = dict(data)
         if isinstance(payload.get("data_type"), WebhookDataType):
             payload["data_type"] = payload["data_type"].value
-        result = self._manager.webhook_post("../webhook/subscription", data=payload)
-        return result.data
-
-    def get_webhook_subscription(
-        self, subscription_id: str
-    ) -> models.WebhookSubscriptionModel | JSONValue:
-        """Get one webhook subscription by ID."""
-        result = self._manager.webhook_get(f"../webhook/subscription/{subscription_id}")
-        if self._response_format == "raw":
-            return result.data
-
-        models = self._get_model_classes()
-        return models.WebhookSubscriptionModel.model_validate(result.data)
+        result = self._manager.post(
+            endpoint=WEBHOOK_PATH, data=payload, headers=self._webhook_headers()
+        )
+        return OuraResponse(
+            data=result.data,
+            model_type=models.WebhookSubscription,
+            metadata={"endpoint": WEBHOOK_PATH, "data": payload},
+        )
 
     def update_webhook_subscription(
-        self, subscription_id: str, data: dict
-    ) -> JSONValue:
+        self, subscription_id: str, data: dict[str, str]
+    ) -> OuraResponse[models.WebhookSubscription]:
         """Update a webhook subscription."""
-        result = self._manager.webhook_put(
-            f"../webhook/subscription/{subscription_id}", data=data
+        result = self._manager.put(
+            f"{WEBHOOK_PATH}/{subscription_id}",
+            data=data,
+            headers=self._webhook_headers(),
         )
-        return result.data
-
-    def delete_webhook_subscription(self, subscription_id: str) -> JSONValue:
-        """Delete a webhook subscription."""
-        result = self._manager.webhook_delete(
-            f"../webhook/subscription/{subscription_id}"
+        return OuraResponse(
+            data=result.data.get("data", []),
+            model_type=models.WebhookSubscription,
+            metadata={"endpoint": f"{WEBHOOK_PATH}/{subscription_id}", "data": data},
         )
-        return result.data
 
-    def renew_webhook_subscription(self, subscription_id: str) -> JSONValue:
+    def renew_webhook_subscription(
+        self, subscription_id: str
+    ) -> OuraResponse[models.WebhookSubscription]:
         """Renew a webhook subscription."""
-        result = self._manager.webhook_put(
-            f"../webhook/subscription/renew/{subscription_id}"
+        result = self._manager.put(
+            endpoint=f"{WEBHOOK_PATH}/renew/{subscription_id}",
+            headers=self._webhook_headers(),
         )
-        return result.data
+        return OuraResponse(
+            data=result.data.get("data", []),
+            model_type=models.WebhookSubscription,
+            metadata={"endpoint": f"{WEBHOOK_PATH}/renew/{subscription_id}"},
+        )
+
+    def delete_webhook_subscription(self, subscription_id: str) -> None:
+        """Delete a webhook subscription."""
+        self._manager.delete(
+            endpoint=f"{WEBHOOK_PATH}/{subscription_id}",
+            headers=self._webhook_headers(),
+        )
 
     def _fetch(
         self, endpoint: str, **kwargs: Any
@@ -254,6 +275,14 @@ class OuraClient:
         }
 
         return records, metadata
+
+    def _webhook_headers(self) -> dict[str, str]:
+        if not self._client_secret:
+            raise ValueError("client_secret is required for webhook operations")
+        return {
+            "x-client-id": self._client_id,
+            "x-client-secret": self._client_secret,
+        }
 
     @staticmethod
     def _set_default_dates(**kwargs: dict[str, Any]) -> dict[str, Any]:

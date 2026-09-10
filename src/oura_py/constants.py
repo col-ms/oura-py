@@ -3,8 +3,10 @@ from enum import Enum
 BASE_URL = "https://api.ouraring.com"
 VERSION = "v2"
 PATH = "usercollection"
+WEBHOOK_PATH = "../webhook/subscription"
 AUTHORIZE_URL = "https://cloud.ouraring.com/oauth/authorize"
 TOKEN_URL = f"{BASE_URL}/oauth/token"
+
 SCOPE = (
     "extapi:email",
     "extapi:personal",
