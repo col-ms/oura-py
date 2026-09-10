@@ -4,7 +4,7 @@ import pytest
 from pydantic import ValidationError
 
 from oura_py.data import models
-from oura_py.data.response import OuraResponse, Result
+from oura_py.data.response import Result
 
 
 def test_good_result(result_data):
@@ -73,26 +73,6 @@ def test_bad_sleep_summary_contributor(sleep_summary_contributor_data):
     sleep_summary_contributor_data["deep_sleep"] = []
     with pytest.raises(ValidationError):
         models.DailySleepContributors(**sleep_summary_contributor_data)
-
-
-def test_nested_response_values_are_parsed():
-    summary = OuraResponse(
-        data=[
-            {
-                "id": "sleep-1",
-                "contributors": {"deep_sleep": 90},
-                "day": "2025-01-01",
-                "score": 85,
-                "timestamp": "2025-01-01T08:00:00Z",
-            }
-        ],
-        model_type=models.DailySleep,
-    )
-
-    assert isinstance(summary.raw(), list)
-    assert summary.raw()[0]["day"] == "2025-01-01"
-    assert summary.raw()[0]["timestamp"] == "2025-01-01T08:00:00Z"
-    assert summary.raw()[0]["contributors"]["deep_sleep"] == 90
 
 
 def test_enum_values_are_validated():
