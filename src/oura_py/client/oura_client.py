@@ -188,7 +188,9 @@ class OuraClient:
         self, subscription_id: str
     ) -> OuraResponse[models.WebhookSubscription]:
         """Get one webhook subscription by ID."""
-        result = self._manager.get(f"{WEBHOOK_PATH}/{subscription_id}")
+        result = self._manager.get(
+            f"{WEBHOOK_PATH}/{subscription_id}", headers=self._webhook_headers()
+        )
         return OuraResponse(
             data=result.data.get("data", []),
             model_type=models.WebhookSubscription,
@@ -251,7 +253,7 @@ class OuraClient:
         self, endpoint: str, **kwargs: Any
     ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
 
-        kwargs = self._set_default_dates(kwargs)
+        kwargs = self._set_default_dates(**kwargs)
         params = self._compact_params(**kwargs)
 
         records: list[dict[str, Any]] = []
