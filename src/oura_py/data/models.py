@@ -12,25 +12,6 @@ class OuraModel(BaseModel):
     model_config = ConfigDict(extra="ignore", validate_assignment=True)
 
 
-SleepTimeRecommendation = Literal[
-    "improve_efficiency",
-    "earlier_bedtime",
-    "later_bedtime",
-    "earlier_wake_up_time",
-    "later_wake_up_time",
-    "follow_optimal_bedtime",
-]
-SleepTimeStatus = Literal[
-    "not_enough_nights",
-    "not_enough_recent_nights",
-    "bad_sleep_quality",
-    "only_recommended_found",
-    "optimal_found",
-]
-WorkoutIntensity = Literal["easy", "moderate", "hard"]
-WorkoutSource = Literal["manual", "autodetected", "confirmed", "workout_heart_rate"]
-
-
 class DailyActivityContributors(OuraModel):
     meet_daily_targets: int | None = None
     move_every_hour: int | None = None
@@ -357,7 +338,6 @@ class WebhookSubscription(OuraModel):
     callback_url: str
     event_type: Literal["create", "update", "delete"]
     data_type: Literal[
-        "tag",
         "enhanced_tag",
         "workout",
         "session",
