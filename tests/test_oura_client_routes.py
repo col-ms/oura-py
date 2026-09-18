@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+import pytest
+
 from oura_py.client.oura_client import OuraClient
 from oura_py.data.response import Result
 
@@ -36,7 +38,7 @@ def test_daily_cardiovascular_age_uses_query_pagination():
     )
 
 
-def test_daily_cardiovascular_age_passes_document_id_as_query_parameter():
+def test_daily_cardiovascular_age_passes_document_id_as_path_parameter():
     client = make_client()
     client._manager.get = Mock(
         return_value=Result(status_code=200, message="OK", data={})
@@ -47,13 +49,16 @@ def test_daily_cardiovascular_age_passes_document_id_as_query_parameter():
     )
 
     client._manager.get.assert_called_once_with(
-        "daily_cardiovascular_age",
-        params={
-            "start_date": "2025-01-01",
-            "end_date": "2025-01-02",
-            "document_id": "record-1",
-        },
+        "daily_cardiovascular_age/record-1",
+        params={},
     )
+
+
+def test_document_id_cannot_be_combined_with_next_token():
+    client = make_client()
+
+    with pytest.raises(ValueError, match="document_id and next_token"):
+        client.daily_cardiovascular_age(document_id="record-1", next_token="page-2")
 
 
 def test_heartrate_uses_datetime_parameters():
@@ -80,12 +85,24 @@ def test_heartrate_uses_datetime_parameters():
         params={
             "start_datetime": "2025-01-01T00:00:00Z",
             "end_datetime": "2025-01-02T00:00:00Z",
-            "start_date": "2025-01-01",
-            "end_date": "2025-01-02",
             "latest": True,
             "fields": "bpm,timestamp",
         },
     )
+
+
+def test_heartrate_defaults_to_datetime_parameters():
+    client = make_client()
+    client._manager.get = Mock(
+        return_value=Result(200, "OK", {"next_token": None, "data": []})
+    )
+
+    client.heartrate()
+
+    params = client._manager.get.call_args.kwargs["params"]
+    assert set(params) == {"start_datetime", "end_datetime"}
+    assert params["start_datetime"].endswith("Z")
+    assert params["end_datetime"].endswith("Z")
 
 
 def test_webhook_routes_use_version_root():

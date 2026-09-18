@@ -1,6 +1,5 @@
 import logging
 import os
-from pprint import pprint
 
 from dotenv import load_dotenv
 
@@ -19,7 +18,13 @@ if __name__ == "__main__":
         interactive=True,
     )
 
-    result = client.get_webhook_subscription("8e429622-d22a-4dbd-bb18-5b35a1e71c00")
-    pprint(result.raw())
+    raw_result = client.daily_sleep(start_date="2026-09-01").raw()
+
+    if len(raw_result) > 0:
+        doc_id = raw_result[0]["id"]
+        doc_result = client.daily_sleep(document_id=doc_id).raw()
+        log.info("Results identical? %s", (raw_result[0] == doc_result))
+    else:
+        raise ValueError("No results returned from initial call")
 
     log.info("Exiting...")

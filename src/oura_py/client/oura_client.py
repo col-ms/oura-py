@@ -9,7 +9,7 @@ from typing import Any, Literal
 from oura_py.auth.oauth_manager import OuraOAuth2Client
 from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
 from oura_py.client.request_manager import RequestManager
-from oura_py.constants import WEBHOOK_PATH, WebhookDataType
+from oura_py.constants import DOC_ID_ERR_MSG, WEBHOOK_PATH, WebhookDataType
 from oura_py.data import models
 from oura_py.data.response import OuraResponse
 
@@ -190,7 +190,7 @@ class OuraClient:
             f"{WEBHOOK_PATH}/{subscription_id}", headers=self._webhook_headers()
         )
         return OuraResponse(
-            data=result.data.get("data", []),
+            data=result.data,
             model_type=models.WebhookSubscription,
             metadata={"endpoint": f"{WEBHOOK_PATH}/{subscription_id}"},
         )
@@ -221,7 +221,7 @@ class OuraClient:
             headers=self._webhook_headers(),
         )
         return OuraResponse(
-            data=result.data.get("data", []),
+            data=result.data,
             model_type=models.WebhookSubscription,
             metadata={"endpoint": f"{WEBHOOK_PATH}/{subscription_id}", "data": data},
         )
@@ -235,7 +235,7 @@ class OuraClient:
             headers=self._webhook_headers(),
         )
         return OuraResponse(
-            data=result.data.get("data", []),
+            data=result.data,
             model_type=models.WebhookSubscription,
             metadata={"endpoint": f"{WEBHOOK_PATH}/renew/{subscription_id}"},
         )
@@ -249,9 +249,16 @@ class OuraClient:
 
     def _fetch(
         self, endpoint: str, **kwargs: Any
-    ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    ) -> tuple[list[dict[str, Any]] | dict[str, Any], dict[str, Any]]:
+        document_id = kwargs.pop("document_id", None)
+        if document_id is not None:
+            if kwargs.get("next_token") is not None:
+                raise ValueError(DOC_ID_ERR_MSG)
+            kwargs.pop("start_date", None)
+            kwargs.pop("end_date", None)
+            return self._fetch_direct(f"{endpoint}/{document_id}", **kwargs)
 
-        kwargs = self._set_default_dates(**kwargs)
+        kwargs = self._set_default_dates(endpoint, **kwargs)
         params = self._compact_params(**kwargs)
         request_params = params.copy()
 
@@ -293,7 +300,10 @@ class OuraClient:
         }
 
     @staticmethod
-    def _set_default_dates(**kwargs: dict[str, Any]) -> dict[str, Any]:
+    def _set_default_dates(endpoint: str, **kwargs: dict[str, Any]) -> dict[str, Any]:
+        if endpoint in {"heartrate", "ring_battery_level"}:
+            return OuraClient._set_default_datetimes(**kwargs)
+
         end_date = kwargs.get("end_date")
         start_date = kwargs.get("start_date")
 
@@ -309,6 +319,31 @@ class OuraClient:
         kwargs["end_date"] = end_date
 
         return kwargs
+
+    @staticmethod
+    def _set_default_datetimes(**kwargs: dict[str, Any]) -> dict[str, Any]:
+        kwargs.pop("start_date", None)
+        kwargs.pop("end_date", None)
+
+        end_datetime = kwargs.get("end_datetime")
+        if end_datetime is None:
+            end_datetime = dt.datetime.now(dt.UTC)
+        elif isinstance(end_datetime, str):
+            end_datetime = dt.datetime.fromisoformat(end_datetime)
+
+        start_datetime = kwargs.get("start_datetime")
+        if start_datetime is None:
+            start_datetime = end_datetime - timedelta(days=1)
+
+        kwargs["start_datetime"] = OuraClient._format_datetime(start_datetime)
+        kwargs["end_datetime"] = OuraClient._format_datetime(end_datetime)
+        return kwargs
+
+    @staticmethod
+    def _format_datetime(value: dt.datetime | str) -> str:
+        if isinstance(value, dt.datetime):
+            return value.isoformat().replace("+00:00", "Z")
+        return value
 
     @staticmethod
     def _compact_params(**params: dict[str, Any]) -> dict[str, Any]:
