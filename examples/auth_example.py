@@ -19,10 +19,9 @@ if __name__ == "__main__":
         client_id=client_id,
         client_secret=client_secret,
         interactive=True,
-        response_format="models",
     )
 
-    result = client.session(start_date="2022-07-01")
+    result = client.personal_info()
     pprint(result.raw())
 
     log.info("Exiting...")

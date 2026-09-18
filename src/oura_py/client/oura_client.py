@@ -54,8 +54,6 @@ class OuraClient:
             redirect_uri: Registered OAuth callback URL.
             ssl_verify: Whether to verify SSL certificates.
             logger: Optional logger used by the client and request manager.
-            response_format: Whether to return raw API response or data models.
-                Usage of "models" requires oura-py[models] to be installed.
         """
 
         self._logger = logger or logging.getLogger(__name__)
@@ -128,7 +126,7 @@ class OuraClient:
         return OuraResponse(data=data, model_type=models.Heartrate, metadata=metadata)
 
     def personal_info(self, **kwargs) -> OuraResponse[models.PersonalInfo]:
-        data, metadata = self._fetch("personal_info", **kwargs)
+        data, metadata = self._fetch_direct("personal_info", **kwargs)
         return OuraResponse(
             data=data, model_type=models.PersonalInfo, metadata=metadata
         )
@@ -278,6 +276,13 @@ class OuraClient:
         }
 
         return records, metadata
+
+    def _fetch_direct(
+        self, endpoint: str, **kwargs: Any
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        params = self._compact_params(**kwargs)
+        result = self._manager.get(endpoint, params=params)
+        return result.data, {"endpoint": endpoint, "params": params}
 
     def _webhook_headers(self) -> dict[str, str]:
         if not self._client_secret:

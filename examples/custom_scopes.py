@@ -40,4 +40,5 @@ if __name__ == "__main__":
         client_secret=client_secret,
         token=token,
     )
-    print(client.get_personal_info())
+    personal_info = client.personal_info()
+    print(personal_info.raw())
