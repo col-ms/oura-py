@@ -390,20 +390,15 @@ name = "oura-py"
 version = "0.1.2"
 source = { editable = "." }
 dependencies = [
+    { name = "pydantic" },
     { name = "requests" },
     { name = "requests-oauthlib" },
-]
-
-[package.optional-dependencies]
-models = [
-    { name = "pydantic" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "ngrok" },
     { name = "pre-commit" },
-    { name = "pydantic" },
     { name = "pylint" },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -414,17 +409,15 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "pydantic", marker = "extra == 'models'", specifier = ">=2.10" },
+    { name = "pydantic", specifier = ">=2.10" },
     { name = "requests", specifier = ">=2.32.3" },
     { name = "requests-oauthlib", specifier = ">=2.0.0" },
 ]
-provides-extras = ["models"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "ngrok", specifier = ">=1.7.0" },
     { name = "pre-commit", specifier = ">=4.1.0" },
-    { name = "pydantic", specifier = ">=2.13.4" },
     { name = "pylint", specifier = ">=3.3.4" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-cov", specifier = ">=6.0.0" },

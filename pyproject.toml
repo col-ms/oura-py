@@ -6,13 +6,15 @@ authors = [{ name = "Collin Smith", email = "collinmsmith22@gmail.com" }]
 readme = "README.md"
 license = "GPL-3.0-only"
 requires-python = ">=3.12"
-dependencies = ["requests-oauthlib>=2.0.0", "requests>=2.32.3"]
+dependencies = [
+    "requests-oauthlib>=2.0.0",
+    "requests>=2.32.3",
+    "pydantic>=2.10",
+]
 
 [project.urls]
 GitHub = "https://github.com/col-ms/oura-py"
 
-[project.optional-dependencies]
-models = ["pydantic>=2.10"]
 
 [build-system]
 requires = ["hatchling"]
@@ -28,7 +30,6 @@ dev = [
     "ngrok>=1.7.0",
     "python-dotenv>=1.0.1",
     "ruff>=0.9.6",
-    "pydantic>=2.13.4",
     "ty>=0.0.75",
 ]
 
