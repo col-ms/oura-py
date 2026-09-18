@@ -10,7 +10,6 @@ import logging
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
-from typing import cast
 from urllib.parse import parse_qs, urlparse
 
 import ngrok
@@ -108,19 +107,14 @@ if __name__ == "__main__":
     )
 
     event_type = "update"
-    data_type = WebhookDataType.DAILY_ACTIVITY
+    data_type = WebhookDataType.SESSION
 
-    existing = client.get_webhook_subscriptions()
-    existing_items: list[JSONValue] = (
-        cast(list[JSONValue], existing.get("data", []))
-        if isinstance(existing, dict)
-        else []
-    )
+    existing = client.list_webhook_subscriptions()
 
     matching: dict[str, JSONValue] | None = next(
         (
             item
-            for item in existing_items
+            for item in existing.raw()
             if isinstance(item, dict)
             and item.get("callback_url") == callback_url
             and item.get("event_type") == event_type
@@ -129,18 +123,21 @@ if __name__ == "__main__":
         None,
     )
     if matching:
-        subscription: dict = matching
-        print("Matching subscription already exists:", subscription)
-    else:
-        subscription = client.create_webhook_subscription(
-            {
-                "callback_url": callback_url,
-                "verification_token": os.environ["WEBHOOK_VERIFICATION_TOKEN"],
-                "event_type": event_type,
-                "data_type": data_type,
-            }
-        )
-        print("Created subscription:", subscription)
+        print("Matching subscription already exists:", matching)
+        print("Deleting old subscription...")
+        sub_id = matching.get("id")
+        deleted = client.delete_webhook_subscription(subscription_id=sub_id)
+        print("Deleted subscription.")
+
+    subscription = client.create_webhook_subscription(
+        {
+            "callback_url": callback_url,
+            "verification_token": os.environ["WEBHOOK_VERIFICATION_TOKEN"],
+            "event_type": event_type,
+            "data_type": data_type,
+        }
+    )
+    print("Created subscription:", subscription.raw())
     print(f"Listening for webhook events on http://0.0.0.0:{port}")
 
     try:

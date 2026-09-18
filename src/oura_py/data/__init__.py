@@ -1,6 +1,7 @@
 """Response schemas and data types returned by the Oura API."""
 
+from oura_py.data import models
 from oura_py.data.exceptions import OuraPyException
-from oura_py.data.response import Result
+from oura_py.data.response import OuraResponse
 
-__all__ = ["OuraPyException", "Result"]
+__all__ = ["OuraPyException", "OuraResponse", "models"]

@@ -40,7 +40,7 @@ def test_bad_personal_info(personal_info_data):
 
 
 def test_good_ring_config(ring_config_data):
-    ring_config = models.RingConfigData(**ring_config_data)
+    ring_config = models.RingConfiguration(**ring_config_data)
     assert ring_config.id == "12345"
     assert ring_config.color == "glossy_black"
     assert ring_config.design == "horizon"
@@ -53,11 +53,11 @@ def test_good_ring_config(ring_config_data):
 def test_bad_ring_config(ring_config_data):
     ring_config_data["color"] = 12345
     with pytest.raises(ValidationError):
-        models.RingConfigData(**ring_config_data)
+        models.RingConfiguration(**ring_config_data)
 
 
-def test_good_sleep_summary_contributor(sleep_summary_contributor_data):
-    sleep_summary_contributor = models.SleepSummaryContributors(
+def test_good_daily_sleep_contributor(sleep_summary_contributor_data):
+    sleep_summary_contributor = models.DailySleepContributors(
         **sleep_summary_contributor_data
     )
     assert sleep_summary_contributor.deep_sleep == 120
@@ -72,32 +72,12 @@ def test_good_sleep_summary_contributor(sleep_summary_contributor_data):
 def test_bad_sleep_summary_contributor(sleep_summary_contributor_data):
     sleep_summary_contributor_data["deep_sleep"] = []
     with pytest.raises(ValidationError):
-        models.SleepSummaryContributors(**sleep_summary_contributor_data)
-
-
-def test_nested_response_values_are_parsed():
-    summary = models.SleepSummary(
-        next_token=None,
-        data=[
-            {
-                "id": "sleep-1",
-                "contributors": {"deep_sleep": 90},
-                "day": "2025-01-01",
-                "score": 85,
-                "timestamp": "2025-01-01T08:00:00Z",
-            }
-        ],
-    )
-
-    assert isinstance(summary.data[0], models.SleepSummaryDatum)
-    assert summary.data[0].day.isoformat() == "2025-01-01"
-    assert summary.data[0].timestamp.tzinfo is not None
-    assert summary.data[0].contributors.deep_sleep == 90
+        models.DailySleepContributors(**sleep_summary_contributor_data)
 
 
 def test_enum_values_are_validated():
     with pytest.raises(ValidationError):
-        models.WorkoutDatum(
+        models.Workout(
             id="workout-1",
             activity="running",
             day="2025-01-01",

@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+import pytest
+
 from oura_py.client.oura_client import OuraClient
 from oura_py.data.response import Result
 
@@ -7,6 +9,7 @@ from oura_py.data.response import Result
 def make_client() -> OuraClient:
     return OuraClient(
         client_id="client_id",
+        client_secret="client_secret",
         token={"access_token": "token", "token_type": "Bearer"},
     )
 
@@ -17,9 +20,9 @@ def test_daily_cardiovascular_age_uses_query_pagination():
         return_value=Result(status_code=200, message="OK", data={})
     )
 
-    client.get_daily_cardiovascular_age(
-        start="2025-01-01",
-        end="2025-01-02",
+    client.daily_cardiovascular_age(
+        start_date="2025-01-01",
+        end_date="2025-01-02",
         next_token="page-2",
         fields="pulse_wave_velocity",
     )
@@ -35,19 +38,27 @@ def test_daily_cardiovascular_age_uses_query_pagination():
     )
 
 
-def test_existing_route_uses_document_id_as_path():
+def test_daily_cardiovascular_age_passes_document_id_as_path_parameter():
     client = make_client()
     client._manager.get = Mock(
         return_value=Result(status_code=200, message="OK", data={})
     )
 
-    try:
-        client.get_daily_cardiovascular_age(document_id="record-1")
-    except TypeError:
-        # The raw endpoint intentionally does not require a model yet.
-        raise AssertionError("raw document route should not be model validated")
+    client.daily_cardiovascular_age(
+        start_date="2025-01-01", end_date="2025-01-02", document_id="record-1"
+    )
 
-    client._manager.get.assert_called_once_with("daily_cardiovascular_age/record-1")
+    client._manager.get.assert_called_once_with(
+        "daily_cardiovascular_age/record-1",
+        params={},
+    )
+
+
+def test_document_id_cannot_be_combined_with_next_token():
+    client = make_client()
+
+    with pytest.raises(ValueError, match="document_id and next_token"):
+        client.daily_cardiovascular_age(document_id="record-1", next_token="page-2")
 
 
 def test_heartrate_uses_datetime_parameters():
@@ -60,9 +71,11 @@ def test_heartrate_uses_datetime_parameters():
         )
     )
 
-    client.get_heartrate_summary(
+    client.heartrate(
         start_datetime="2025-01-01T00:00:00Z",
         end_datetime="2025-01-02T00:00:00Z",
+        start_date="2025-01-01",
+        end_date="2025-01-02",
         latest=True,
         fields="bpm,timestamp",
     )
@@ -78,22 +91,40 @@ def test_heartrate_uses_datetime_parameters():
     )
 
 
-def test_webhook_routes_use_version_root():
+def test_heartrate_defaults_to_datetime_parameters():
     client = make_client()
-    client._manager.webhook_get = Mock(
-        return_value=Result(status_code=200, message="OK", data={})
-    )
-    client._manager.webhook_post = Mock(
-        return_value=Result(status_code=201, message="Created", data={})
-    )
-    client._manager.webhook_put = Mock(
-        return_value=Result(status_code=200, message="OK", data={})
-    )
-    client._manager.webhook_delete = Mock(
-        return_value=Result(status_code=204, message="No Content", data={})
+    client._manager.get = Mock(
+        return_value=Result(200, "OK", {"next_token": None, "data": []})
     )
 
-    client.get_webhook_subscriptions()
+    client.heartrate()
+
+    params = client._manager.get.call_args.kwargs["params"]
+    assert set(params) == {"start_datetime", "end_datetime"}
+    assert params["start_datetime"].endswith("Z")
+    assert params["end_datetime"].endswith("Z")
+
+
+def test_webhook_routes_use_version_root():
+    client = make_client()
+    client._manager.get = Mock(
+        return_value=Result(status_code=200, message="OK", data={"data": []})
+    )
+    client._manager.post = Mock(
+        return_value=Result(status_code=201, message="Created", data={})
+    )
+    client._manager.put = Mock(
+        return_value=Result(status_code=200, message="OK", data={})
+    )
+    client._manager.delete = Mock(
+        return_value=Result(status_code=204, message="No Content", data={})
+    )
+    headers = {
+        "x-client-id": "client_id",
+        "x-client-secret": "client_secret",
+    }
+
+    client.list_webhook_subscriptions()
     client.create_webhook_subscription({"callback_url": "https://example.test"})
     client.get_webhook_subscription("sub-1")
     client.update_webhook_subscription(
@@ -102,15 +133,25 @@ def test_webhook_routes_use_version_root():
     client.renew_webhook_subscription("sub-1")
     client.delete_webhook_subscription("sub-1")
 
-    client._manager.webhook_get.assert_any_call("../webhook/subscription")
-    client._manager.webhook_post.assert_called_once_with(
-        "../webhook/subscription", data={"callback_url": "https://example.test"}
+    client._manager.get.assert_any_call(
+        endpoint="../webhook/subscription", headers=headers
     )
-    client._manager.webhook_put.assert_any_call(
+    client._manager.get.assert_any_call(
+        "../webhook/subscription/sub-1", headers=headers
+    )
+    client._manager.post.assert_called_once_with(
+        endpoint="../webhook/subscription",
+        data={"callback_url": "https://example.test"},
+        headers=headers,
+    )
+    client._manager.put.assert_any_call(
         "../webhook/subscription/sub-1",
         data={"callback_url": "https://example.test"},
+        headers=headers,
     )
-    client._manager.webhook_put.assert_any_call("../webhook/subscription/renew/sub-1")
-    client._manager.webhook_delete.assert_called_once_with(
-        "../webhook/subscription/sub-1"
+    client._manager.put.assert_any_call(
+        endpoint="../webhook/subscription/renew/sub-1", headers=headers
+    )
+    client._manager.delete.assert_called_once_with(
+        endpoint="../webhook/subscription/sub-1", headers=headers
     )
