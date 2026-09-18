@@ -65,7 +65,7 @@ jobs:
           if-no-files-found: error
 
   install:
-    name: Install ${{ matrix.distribution }} (${{ matrix.install }}, Python ${{ matrix.python-version }})
+    name: Install ${{ matrix.distribution }} (Python ${{ matrix.python-version }})
     needs: build
     runs-on: ubuntu-latest
     strategy:
@@ -73,7 +73,6 @@ jobs:
       matrix:
         python-version: ["3.12", "3.14"]
         distribution: [wheel, sdist]
-        install: [base, models]
 
     steps:
       - uses: actions/setup-python@v5
@@ -93,17 +92,9 @@ jobs:
           else
             package=$(find dist -name '*.tar.gz' -print -quit)
           fi
-          if [ "${{ matrix.install }}" = "models" ]; then
-            .venv-install/bin/python -m pip install "${package}[models]"
-          else
-            .venv-install/bin/python -m pip install "$package"
-          fi
+          .venv-install/bin/python -m pip install "$package"
           .venv-install/bin/python -m pip check
-      - name: Verify the selected installation mode
+      - name: Verify the standard installation
         shell: bash
         run: |
-          if [ "${{ matrix.install }}" = "models" ]; then
-            .venv-install/bin/python -c "from importlib.resources import files; from oura_py.data import models; assert models.PersonalInfo; assert files('oura_py').joinpath('py.typed').is_file()"
-          else
-            .venv-install/bin/python -c "import importlib.util; from importlib.resources import files; assert importlib.util.find_spec('pydantic') is None; import oura_py; import oura_py.data; assert files('oura_py').joinpath('py.typed').is_file()"
-          fi
+          .venv-install/bin/python -c "from importlib.resources import files; from oura_py.data import models; assert models.PersonalInfo; assert files('oura_py').joinpath('py.typed').is_file()"
