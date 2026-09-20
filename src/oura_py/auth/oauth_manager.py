@@ -45,7 +45,5 @@ class OuraOAuth2Client:
             client_id=self.client_id,
             client_secret=self.client_secret,
         )
-        # OAuth providers are allowed to omit refresh_token when it has not
-        # rotated. Keep the existing credential in that case.
         token.setdefault("refresh_token", refresh_token)
         return token

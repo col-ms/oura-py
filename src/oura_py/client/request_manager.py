@@ -17,7 +17,6 @@ class RequestManager:
         client_secret: str | None = None,
         token_updater: Callable | None = None,
         ssl_verify: bool = True,
-        logger: logging.Logger | None = None,
     ) -> None:
         """Manage authenticated HTTP requests to the Oura API.
 
@@ -27,14 +26,13 @@ class RequestManager:
             client_secret: OAuth application client secret.
             token_updater: Optional callback invoked with a refreshed token.
             ssl_verify: Whether to verify SSL certificates.
-            logger: Optional logger used for request diagnostics.
         """
         self._url = f"{BASE_URL}/{VERSION}/{PATH}"
         self._version_url = f"{BASE_URL}/{VERSION}"
         self._client_id = client_id
         self._client_secret = client_secret
-        self._logger = logger or logging.getLogger(__name__)
         self._ssl_verify = ssl_verify
+        self._logger = logging.getLogger(__name__)
         if not ssl_verify:
             import urllib3
 
@@ -62,15 +60,7 @@ class RequestManager:
         params: dict | None = None,
         headers: dict[str, str] | None = None,
     ) -> Result:
-        """Sends a GET request to the specified endpoint with optional parameters.
-
-        Args:
-            endpoint (str): The API endpoint to send the GET request to.
-            params (Dict, optional): A dictionary of query parameters to include in the request. Defaults to None.
-
-        Returns:
-            Result: The result of the GET request.
-        """
+        """Send a GET request to the specified endpoint."""
         return self._request(
             method="GET", endpoint=endpoint, params=params, headers=headers
         )
@@ -82,17 +72,7 @@ class RequestManager:
         data: dict | None = None,
         headers: dict[str, str] | None = None,
     ) -> Result:
-        """
-        Sends a POST request to the specified endpoint with the given parameters and data.
-
-        Args:
-            endpoint (str): The API endpoint to send the request to.
-            params (Dict, optional): The query parameters to include in the request. Defaults to None.
-            data (Dict, optional): The data to include in the body of the request. Defaults to None.
-
-        Returns:
-            Result: The result of the POST request.
-        """
+        """Send a POST request to the specified endpoint."""
         return self._request(
             method="POST", endpoint=endpoint, params=params, data=data, headers=headers
         )
@@ -103,7 +83,7 @@ class RequestManager:
         data: dict | None = None,
         headers: dict[str, str] | None = None,
     ) -> Result:
-        """Send a JSON PUT request to an API endpoint."""
+        """Send a PUT request to the specified endpoint."""
         return self._request(
             method="PUT", endpoint=endpoint, data=data, headers=headers
         )
