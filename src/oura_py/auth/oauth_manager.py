@@ -1,6 +1,6 @@
 from requests_oauthlib import OAuth2Session
 
-from oura_py.constants import AUTHORIZE_URL, SCOPE, TOKEN_URL
+from oura_py.constants import AUTHORIZE_URL, TOKEN_URL
 
 
 class OuraOAuth2Client:
@@ -20,11 +20,11 @@ class OuraOAuth2Client:
 
     def get_authorization_url(
         self,
-        scope: list[str] | None = None,
+        scope: list[str] | tuple[str] | None = None,
         redirect_uri: str | None = None,
         state: str | None = None,
     ) -> tuple[str, str]:
-        self.session.scope = scope or SCOPE
+        self.session.scope = scope
         self.session.redirect_uri = redirect_uri
         return self.session.authorization_url(url=AUTHORIZE_URL, state=state)
 
