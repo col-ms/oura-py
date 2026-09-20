@@ -43,7 +43,6 @@ def test_good_get(manager):
         result = manager.get("test_endpoint")
         assert result.data == {"data": "test data"}
         assert result.status_code == 200
-        assert result.message == "OK"
 
 
 def test_get_request_exception(manager):
@@ -70,7 +69,7 @@ def test_get_bad_json(manager):
 
 def test_get_non_2xx_status(manager):
     with patch.object(manager._session, "request") as mock_request:
-        mock_response = Mock(status_code=404, reason="Not Found")
+        mock_response = Mock(status_code=404, reason="Not Found", ok=False)
         mock_response.json.return_value = {"error": "not found"}
         mock_request.return_value = mock_response
 

@@ -18,15 +18,7 @@ class RequestManager:
         token_updater: Callable | None = None,
         ssl_verify: bool = True,
     ) -> None:
-        """Manage authenticated HTTP requests to the Oura API.
-
-        Args:
-            client_id: OAuth application client ID.
-            token: Complete OAuth token response, including ``access_token``.
-            client_secret: OAuth application client secret.
-            token_updater: Optional callback invoked with a refreshed token.
-            ssl_verify: Whether to verify SSL certificates.
-        """
+        """Manage authenticated HTTP requests to the Oura API."""
         self._url = f"{BASE_URL}/{VERSION}/{PATH}"
         self._version_url = f"{BASE_URL}/{VERSION}"
         self._client_id = client_id
@@ -100,30 +92,14 @@ class RequestManager:
         data: dict | None = None,
         headers: dict[str, str] | None = None,
     ) -> Result:
-        """
-        Makes an HTTP request to the specified endpoint with the given method, parameters, and data.
-
-        Args:
-            method (str): The HTTP method to use for the request (e.g., 'GET', 'POST').
-            endpoint (str): The API endpoint to send the request to.
-            params (Dict, optional): The query parameters to include in the request. Defaults to None.
-            data (Dict, optional): The data to include in the request body. Defaults to None.
-
-        Returns:
-            Result: An object containing the status code, message, and data from the response.
-
-        Raises:
-            OuraPyException: If there is an error making the request or if the response contains bad JSON.
-        """
+        """Send a request and return its decoded response."""
         url = (
             f"{self._version_url}/{endpoint[3:]}"
             if endpoint.startswith("../")
             else f"{self._url}/{endpoint}"
         )
-        log_pre = f"method={method}, url={url}, params={params}"
-        log_post = "success={}, status_code={}, message={}"
         try:
-            self._logger.debug(msg=log_pre)
+            self._logger.debug("method=%s url=%s params=%s", method, url, params)
             response = self._session.request(
                 method=method,
                 url=url,
@@ -133,7 +109,7 @@ class RequestManager:
                 verify=self._ssl_verify,
             )
         except requests.exceptions.RequestException as e:
-            self._logger.error(msg=str(e))
+            self._logger.error(str(e))
             raise OuraPyException("Error making request") from e
         if response.status_code == 204 or not response.content:
             data_out = {}
@@ -141,25 +117,19 @@ class RequestManager:
             try:
                 data_out = response.json()
             except ValueError as e:
-                self._logger.error(msg=log_post.format(False, None, e))
                 raise OuraPyException("Bad JSON in response") from e
         # Result currently models payloads as dictionaries. Some Oura
         # endpoints, including webhook subscription listing, return a
         # top-level JSON array, so preserve that payload under ``data``.
         if not isinstance(data_out, dict):
             data_out = {"data": data_out}
-        req_success = 299 >= response.status_code >= 200
-        log_line = log_post.format(req_success, response.status_code, response.reason)
-        if req_success:
-            self._logger.debug(msg=log_line)
-            return Result(
-                status_code=response.status_code, message=response.reason, data=data_out
-            )
-        self._logger.error(msg=log_line)
+        if response.ok:
+            return Result(status_code=response.status_code, data=data_out)
         detail = data_out.get("detail") if isinstance(data_out, dict) else None
         error_message = f"{response.status_code}: {response.reason}"
         if detail:
             error_message += f" - {detail}"
         elif data_out:
             error_message += f" - {data_out}"
+        self._logger.error(error_message)
         raise OuraPyException(error_message)

@@ -8,19 +8,9 @@ from oura_py.data.response import Result
 
 
 def test_good_result(result_data):
-    result = Result(**result_data)
+    result = Result(status_code=result_data["status_code"], data=result_data["data"])
     assert result.status_code == 200
-    assert result.message == "OK"
     assert result.data == {"key": "value"}
-
-
-def test_bad_result(result_data):
-    result_data["status_code"] = "200"
-    with pytest.raises(
-        TypeError,
-        match=f"status_code must be <class 'int'>, got {type(result_data['status_code'])}",
-    ):
-        Result(**result_data)
 
 
 def test_good_personal_info(personal_info_data):

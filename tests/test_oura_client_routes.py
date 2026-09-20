@@ -16,9 +16,7 @@ def make_client() -> OuraClient:
 
 def test_daily_cardiovascular_age_uses_query_pagination():
     client = make_client()
-    client._manager.get = Mock(
-        return_value=Result(status_code=200, message="OK", data={})
-    )
+    client._manager.get = Mock(return_value=Result(status_code=200, data={}))
 
     client.daily_cardiovascular_age(
         start_date="2025-01-01",
@@ -40,9 +38,7 @@ def test_daily_cardiovascular_age_uses_query_pagination():
 
 def test_daily_cardiovascular_age_passes_document_id_as_path_parameter():
     client = make_client()
-    client._manager.get = Mock(
-        return_value=Result(status_code=200, message="OK", data={})
-    )
+    client._manager.get = Mock(return_value=Result(status_code=200, data={}))
 
     client.daily_cardiovascular_age(
         start_date="2025-01-01", end_date="2025-01-02", document_id="record-1"
@@ -66,7 +62,6 @@ def test_heartrate_uses_datetime_parameters():
     client._manager.get = Mock(
         return_value=Result(
             status_code=200,
-            message="OK",
             data={"next_token": None, "data": []},
         )
     )
@@ -94,7 +89,7 @@ def test_heartrate_uses_datetime_parameters():
 def test_heartrate_defaults_to_datetime_parameters():
     client = make_client()
     client._manager.get = Mock(
-        return_value=Result(200, "OK", {"next_token": None, "data": []})
+        return_value=Result(200, {"next_token": None, "data": []})
     )
 
     client.heartrate()
@@ -107,18 +102,10 @@ def test_heartrate_defaults_to_datetime_parameters():
 
 def test_webhook_routes_use_version_root():
     client = make_client()
-    client._manager.get = Mock(
-        return_value=Result(status_code=200, message="OK", data={"data": []})
-    )
-    client._manager.post = Mock(
-        return_value=Result(status_code=201, message="Created", data={})
-    )
-    client._manager.put = Mock(
-        return_value=Result(status_code=200, message="OK", data={})
-    )
-    client._manager.delete = Mock(
-        return_value=Result(status_code=204, message="No Content", data={})
-    )
+    client._manager.get = Mock(return_value=Result(status_code=200, data={"data": []}))
+    client._manager.post = Mock(return_value=Result(status_code=201, data={}))
+    client._manager.put = Mock(return_value=Result(status_code=200, data={}))
+    client._manager.delete = Mock(return_value=Result(status_code=204, data={}))
     headers = {
         "x-client-id": "client_id",
         "x-client-secret": "client_secret",
