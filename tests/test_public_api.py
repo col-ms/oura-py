@@ -26,7 +26,5 @@ def test_data_public_exports():
 
 
 def test_auth_public_exports():
-    assert auth.__all__ == [
-        "OuraOAuth2Client",
-    ]
+    assert auth.__all__ == ["OAuthToken", "OuraOAuth2Client", "TokenUpdater"]
     assert auth.OuraOAuth2Client is OuraOAuth2Client
