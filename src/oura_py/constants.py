@@ -43,3 +43,6 @@ class WebhookDataType(str, Enum):
     DAILY_RESILIENCE = "daily_resilience"
     VO2_MAX = "vo2_max"
     MEAL = "meal"
+
+
+WEBHOOK_DATA_TYPES = frozenset(item.value for item in WebhookDataType)

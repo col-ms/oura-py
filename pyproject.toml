@@ -1,6 +1,6 @@
 [project]
 name = "oura-py"
-version = "0.2.0"
+version = "0.3.0"
 description = "A python wrapper for Oura Ring's V2 API."
 authors = [{ name = "Collin Smith", email = "collinmsmith22@gmail.com" }]
 readme = "README.md"
@@ -17,8 +17,8 @@ GitHub = "https://github.com/col-ms/oura-py"
 
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.14,<0.9.0"]
+build-backend = "uv_build"
 
 
 [dependency-groups]
@@ -32,7 +32,3 @@ dev = [
     "ruff>=0.9.6",
     "ty>=0.0.75",
 ]
-
-[tool.pyright]
-typeCheckingMode = "off"
-ignore = ["*"]

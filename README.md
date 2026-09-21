@@ -1,3 +1,11 @@
+# Oura-Py
+
+`oura-py`: A python wrapper for interacting with Oura Ring's V2 API.
+
+## Installation
+
+Proper installation documentation to be added upon first production release.
+
 ## Authentication
 
 Oura no longer accepts Personal Access Tokens. This package uses OAuth2
@@ -9,14 +17,14 @@ Before using the client, end users need an Oura developer application:
 
 1. Create an OAuth application in the Oura developer portal.
 2. Copy its client ID and client secret.
-3. Add the callback URL configured for the script. The default is
-   `http://localhost:8080/callback`.
+3. Add the callback URL used by your application.
 4. Grant the scopes required by the application. The client requests Oura's
    standard data scopes by default; custom scopes can be supplied through the
    lower-level `OuraOAuth2Client` API.
 
-The callback URL must match the URL registered with Oura. If a different URL
-is registered, pass that URL to `OuraClient` with `redirect_uri`.
+The callback URL must match the URL registered with Oura. Authorization and
+token persistence are application responsibilities; use
+`OuraOAuth2Client` to perform the OAuth protocol steps.
 
 ### Local setup
 
@@ -26,16 +34,13 @@ export them in the shell):
 ```text
 CLIENT_ID=your-oura-client-id
 CLIENT_SECRET=your-oura-client-secret
+OURA_TOKEN='{"access_token":"...","refresh_token":"..."}'
 ```
 
-Keep `.env` private. It is for static application configuration; OAuth access
-and refresh tokens are stored separately.
-
-### First run
-
-The first interactive run opens the Oura consent page in a browser:
+### Using an application-managed token
 
 ```python
+import json
 import os
 
 from oura_py import OuraClient
@@ -43,20 +48,21 @@ from oura_py import OuraClient
 client = OuraClient(
     client_id=os.environ["CLIENT_ID"],
     client_secret=os.environ["CLIENT_SECRET"],
-    token_path=".oura_tokens.json",
-    redirect_uri="http://localhost:8080/callback",
-    interactive=True,
+    token=json.loads(os.environ["OURA_TOKEN"]),
 )
 ```
 
-After consent, Oura redirects the browser to the local callback and the client
-saves the resulting token in `.oura_tokens.json`. Later runs reuse that token
-and refresh it automatically when necessary. The token file is ignored by
-Git; do not commit it or put refresh tokens in `.env`.
+The application obtains and stores the token. `OuraClient` refreshes it when
+needed and can notify the application when the token changes:
 
-For a non-interactive process, perform authorization once and then construct
-the client with `interactive=False` (the default). It will use the existing
-token store and fail clearly if no usable token is available.
+```python
+client = OuraClient(
+    client_id=client_id,
+    client_secret=client_secret,
+    token=stored_token,
+    token_updater=save_token,
+)
+```
 
 ## Client architecture
 
@@ -72,7 +78,7 @@ from oura_py import OuraClient
 
 client = OuraClient(
     client_id=os.environ["CLIENT_ID"],
-    token_path=".oura_tokens.json",
+    token=json.loads(os.environ["OURA_TOKEN"]),
 )
 
 response = client.daily_sleep(
@@ -174,21 +180,6 @@ client = OuraClient(
 )
 ```
 
-`OuraClient` accepts a custom `TokenStore` through `token_store`. This allows
-applications to use an OS keyring, encrypted storage, or a deployment secret
-manager without changing the client or request code:
-
-```python
-client = OuraClient(
-    client_id=os.environ["CLIENT_ID"],
-    client_secret=os.environ["CLIENT_SECRET"],
-    token_store=my_keyring_store,
-)
-```
-
-`JsonTokenStore` is intended for local development and command-line scripts;
-use a keyring or secret manager for shared or production environments.
-
 ### Webhooks
 
 See `examples/webhook_example.py` for a complete subscription and receiver
@@ -201,6 +192,7 @@ The example expects these environment variables:
 ```text
 CLIENT_ID=your-oura-client-id
 CLIENT_SECRET=your-oura-client-secret
+OURA_TOKEN='{"access_token":"...","refresh_token":"..."}'
 WEBHOOK_VERIFICATION_TOKEN=choose-a-secret-value
 NGROK_AUTHTOKEN=your-ngrok-authtoken
 ```

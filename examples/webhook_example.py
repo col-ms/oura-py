@@ -6,7 +6,6 @@ The callback URL is exposed automatically via ngrok.
 import hashlib
 import hmac
 import json
-import logging
 import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
@@ -17,9 +16,6 @@ from dotenv import load_dotenv
 
 from oura_py.client.oura_client import OuraClient
 from oura_py.constants import WebhookDataType
-from oura_py.data.response import JSONValue
-
-logger = logging.getLogger("oura_webhook")
 
 
 class OuraWebhookHandler(BaseHTTPRequestHandler):
@@ -38,21 +34,10 @@ class OuraWebhookHandler(BaseHTTPRequestHandler):
         expected_token = os.environ["WEBHOOK_VERIFICATION_TOKEN"]
         challenge = query.get("challenge", [None])[0]
         token_matches = received_token == expected_token
-        logger.info(
-            "Received webhook verification request from %s; query_keys=%s "
-            "challenge=%r verification_token_present=%s token_matches=%s",
-            self.client_address[0],
-            sorted(query),
-            challenge,
-            received_token is not None,
-            token_matches,
-        )
         if not token_matches:
-            logger.warning("Rejected webhook verification request: token mismatch")
             self._send_json(401, {"error": "invalid verification token"})
             return
-        logger.info("Accepted webhook verification request")
-        self._send_json(200, {"challenge": query.get("challenge", [None])[0]})
+        self._send_json(200, {"challenge": challenge})
 
     def do_POST(self) -> None:
         content_length = int(self.headers.get("Content-Length", "0"))
@@ -88,7 +73,6 @@ class OuraWebhookHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
     load_dotenv()
     port = 8000
 
@@ -102,19 +86,16 @@ if __name__ == "__main__":
     client = OuraClient(
         client_id=os.environ["CLIENT_ID"],
         client_secret=os.environ["CLIENT_SECRET"],
-        token_path=".oura_tokens.json",
-        interactive=True,
+        token=json.loads(os.environ["OURA_TOKEN"]),
     )
 
     event_type = "update"
     data_type = WebhookDataType.SESSION
 
-    existing = client.list_webhook_subscriptions()
-
-    matching: dict[str, JSONValue] | None = next(
+    matching = next(
         (
             item
-            for item in existing.raw()
+            for item in client.list_webhook_subscriptions().raw()
             if isinstance(item, dict)
             and item.get("callback_url") == callback_url
             and item.get("event_type") == event_type
@@ -123,11 +104,7 @@ if __name__ == "__main__":
         None,
     )
     if matching:
-        print("Matching subscription already exists:", matching)
-        print("Deleting old subscription...")
-        sub_id = matching.get("id")
-        deleted = client.delete_webhook_subscription(subscription_id=sub_id)
-        print("Deleted subscription.")
+        client.delete_webhook_subscription(subscription_id=matching["id"])
 
     subscription = client.create_webhook_subscription(
         {

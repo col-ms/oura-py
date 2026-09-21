@@ -1,80 +1,50 @@
 from __future__ import annotations
 
 import datetime as dt
-import logging
-from collections.abc import Callable
 from datetime import timedelta
-from typing import Any, Literal
+from typing import Any
 
-from oura_py.auth.oauth_manager import OuraOAuth2Client
-from oura_py.auth.token_manager import JsonTokenStore, TokenManager, TokenStore
+from oura_py.auth.types import OAuthToken, TokenUpdater
 from oura_py.client.request_manager import RequestManager
-from oura_py.constants import DOC_ID_ERR_MSG, WEBHOOK_PATH, WebhookDataType
+from oura_py.constants import (
+    DOC_ID_ERR_MSG,
+    WEBHOOK_DATA_TYPES,
+    WEBHOOK_PATH,
+    WebhookDataType,
+)
 from oura_py.data import models
 from oura_py.data.response import OuraResponse
-
-ResponseFormat = Literal["raw", "models"]
 
 
 class OuraClient:
     """Authenticated client for Oura's v2 API.
 
-    A complete OAuth token can be supplied directly through ``token``. When
-    it is omitted, the client uses ``token_manager`` or creates a local
-    ``TokenManager`` backed by ``token_store``/``token_path``. Browser-based
-    authorization is only attempted when ``interactive=True``.
+    The consuming application owns OAuth authorization and token persistence.
+    Supply a complete OAuth token; ``token_updater`` is called by the request
+    layer when a refreshed token is obtained.
     """
 
     def __init__(
         self,
         client_id: str,
-        token: dict | None = None,
+        token: OAuthToken,
         client_secret: str | None = None,
-        token_updater: Callable | None = None,
-        token_manager: TokenManager | None = None,
-        token_store: TokenStore | None = None,
-        interactive: bool = False,
-        token_path: str | None = None,
-        redirect_uri: str | None = None,
+        token_updater: TokenUpdater | None = None,
         ssl_verify: bool = True,
-        logger: logging.Logger | None = None,
     ):
-        """Initialize an authenticated Oura API client.
-
-        Args:
-            client_id: OAuth application client ID.
-            token: Complete OAuth token response. If omitted, a token is
-                resolved through ``token_manager`` or the configured store.
-            client_secret: OAuth application client secret.
-            token_updater: Optional callback for persisting refreshed tokens.
-            token_manager: Custom token acquisition and refresh handler.
-            token_store: Token store used by the default token manager.
-            interactive: Whether missing credentials may start browser auth.
-            token_path: Local JSON token path used by the default store.
-            redirect_uri: Registered OAuth callback URL.
-            ssl_verify: Whether to verify SSL certificates.
-            logger: Optional logger used by the client and request manager.
+        """
+        Initialize an authenticated Oura API client.
         """
 
-        self._logger = logger or logging.getLogger(__name__)
         if token is None:
-            if token_manager is None:
-                if not client_secret:
-                    raise ValueError("client_secret is required when token is omitted")
-                store = token_store or JsonTokenStore(token_path or ".oura_tokens.json")
-                token_manager = TokenManager(
-                    OuraOAuth2Client(client_id, client_secret),
-                    store=store,
-                    redirect_uri=redirect_uri,
-                )
-            token = token_manager.get_valid_token(interactive=interactive)
+            raise ValueError("token is required")
+
         self._manager = RequestManager(
             client_id=client_id,
-            token=token,
             client_secret=client_secret,
+            token=token,
             token_updater=token_updater,
             ssl_verify=ssl_verify,
-            logger=self._logger,
         )
         self._client_id = client_id
         self._client_secret = client_secret
@@ -200,8 +170,13 @@ class OuraClient:
     ) -> OuraResponse[models.WebhookSubscription]:
         """Create a webhook subscription from an OpenAPI request payload."""
         payload = dict(data)
-        if isinstance(payload.get("data_type"), WebhookDataType):
-            payload["data_type"] = payload["data_type"].value
+        data_type = payload.get("data_type")
+
+        if isinstance(data_type, WebhookDataType):
+            data_type = data_type.value
+            payload["data_type"] = data_type
+        if data_type not in WEBHOOK_DATA_TYPES:
+            raise ValueError(f"Invalid webhook data type: {data_type!r}")
         result = self._manager.post(
             endpoint=WEBHOOK_PATH, data=payload, headers=self._webhook_headers()
         )
@@ -300,7 +275,7 @@ class OuraClient:
         }
 
     @staticmethod
-    def _set_default_dates(endpoint: str, **kwargs: dict[str, Any]) -> dict[str, Any]:
+    def _set_default_dates(endpoint: str, **kwargs: Any) -> dict[str, Any]:
         if endpoint in {"heartrate", "ring_battery_level"}:
             return OuraClient._set_default_datetimes(**kwargs)
 
@@ -321,7 +296,7 @@ class OuraClient:
         return kwargs
 
     @staticmethod
-    def _set_default_datetimes(**kwargs: dict[str, Any]) -> dict[str, Any]:
+    def _set_default_datetimes(**kwargs: Any) -> dict[str, Any]:
         kwargs.pop("start_date", None)
         kwargs.pop("end_date", None)
 
@@ -346,6 +321,6 @@ class OuraClient:
         return value
 
     @staticmethod
-    def _compact_params(**params: dict[str, Any]) -> dict[str, Any]:
+    def _compact_params(**params: Any) -> dict[str, Any]:
         """Remove unset optional query parameters before sending a request."""
         return {key: value for key, value in params.items() if value is not None}
