@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import datetime as dt
-from collections.abc import Callable
 from datetime import timedelta
 from typing import Any
 
+from oura_py.auth.types import OAuthToken, TokenUpdater
 from oura_py.client.request_manager import RequestManager
 from oura_py.constants import (
     DOC_ID_ERR_MSG,
@@ -27,9 +27,9 @@ class OuraClient:
     def __init__(
         self,
         client_id: str,
+        token: OAuthToken,
         client_secret: str | None = None,
-        token: dict | None = None,
-        token_updater: Callable | None = None,
+        token_updater: TokenUpdater | None = None,
         ssl_verify: bool = True,
     ):
         """

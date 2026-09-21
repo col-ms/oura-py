@@ -1,9 +1,10 @@
 import logging
-from collections.abc import Callable
+from typing import cast
 
 import requests
 from requests_oauthlib import OAuth2Session
 
+from oura_py.auth.types import OAuthToken, TokenUpdater
 from oura_py.constants import BASE_URL, PATH, TOKEN_URL, VERSION
 from oura_py.data.exceptions import OuraPyException
 from oura_py.data.response import Result
@@ -13,9 +14,9 @@ class RequestManager:
     def __init__(
         self,
         client_id: str,
-        token: dict,
+        token: OAuthToken,
         client_secret: str | None = None,
-        token_updater: Callable | None = None,
+        token_updater: TokenUpdater | None = None,
         ssl_verify: bool = True,
     ) -> None:
         """Manage authenticated HTTP requests to the Oura API."""
@@ -30,7 +31,7 @@ class RequestManager:
 
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-        token = dict(token)
+        token = cast(OAuthToken, dict(token))
         if not token.get("access_token"):
             raise ValueError("token must contain an access_token")
         token.setdefault("token_type", "Bearer")

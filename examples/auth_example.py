@@ -7,11 +7,12 @@ from dotenv import load_dotenv
 
 from oura_py import OuraClient
 from oura_py.auth import OuraOAuth2Client
+from oura_py.auth.types import OAuthToken
 
-TOKEN_PATH = Path("examples/.example_oura_tokens.json")
+TOKEN_PATH = Path(".oura_tokens.json")
 
 
-def save_token(token: dict) -> None:
+def save_token(token: OAuthToken) -> None:
     """Persist refreshed credentials without touching the application's token."""
     TOKEN_PATH.write_text(json.dumps(token, indent=2), encoding="utf-8")
 

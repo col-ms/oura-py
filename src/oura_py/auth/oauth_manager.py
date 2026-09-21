@@ -1,5 +1,6 @@
 from requests_oauthlib import OAuth2Session
 
+from oura_py.auth.types import OAuthToken
 from oura_py.constants import AUTHORIZE_URL, TOKEN_URL
 
 
@@ -28,7 +29,7 @@ class OuraOAuth2Client:
         self.session.redirect_uri = redirect_uri
         return self.session.authorization_url(url=AUTHORIZE_URL, state=state)
 
-    def exchange_code(self, code: str) -> dict:
+    def exchange_code(self, code: str) -> OAuthToken:
         return self.session.fetch_token(
             token_url=TOKEN_URL,
             code=code,
@@ -36,7 +37,7 @@ class OuraOAuth2Client:
             include_client_id=True,
         )
 
-    def refresh_access_token(self, refresh_token: str) -> dict:
+    def refresh_access_token(self, refresh_token: str) -> OAuthToken:
         if not refresh_token:
             raise ValueError("refresh_token is required")
         token = self.session.refresh_token(
