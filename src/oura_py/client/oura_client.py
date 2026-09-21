@@ -6,7 +6,12 @@ from datetime import timedelta
 from typing import Any
 
 from oura_py.client.request_manager import RequestManager
-from oura_py.constants import DOC_ID_ERR_MSG, WEBHOOK_PATH, WebhookDataType
+from oura_py.constants import (
+    DOC_ID_ERR_MSG,
+    WEBHOOK_DATA_TYPES,
+    WEBHOOK_PATH,
+    WebhookDataType,
+)
 from oura_py.data import models
 from oura_py.data.response import OuraResponse
 
@@ -165,8 +170,13 @@ class OuraClient:
     ) -> OuraResponse[models.WebhookSubscription]:
         """Create a webhook subscription from an OpenAPI request payload."""
         payload = dict(data)
-        if isinstance(payload.get("data_type"), WebhookDataType):
-            payload["data_type"] = payload["data_type"].value
+        data_type = payload.get("data_type")
+
+        if isinstance(data_type, WebhookDataType):
+            data_type = data_type.value
+            payload["data_type"] = data_type
+        if data_type not in WEBHOOK_DATA_TYPES:
+            raise ValueError(f"Invalid webhook data type: {data_type!r}")
         result = self._manager.post(
             endpoint=WEBHOOK_PATH, data=payload, headers=self._webhook_headers()
         )
@@ -265,7 +275,7 @@ class OuraClient:
         }
 
     @staticmethod
-    def _set_default_dates(endpoint: str, **kwargs: dict[str, Any]) -> dict[str, Any]:
+    def _set_default_dates(endpoint: str, **kwargs: Any) -> dict[str, Any]:
         if endpoint in {"heartrate", "ring_battery_level"}:
             return OuraClient._set_default_datetimes(**kwargs)
 
@@ -286,7 +296,7 @@ class OuraClient:
         return kwargs
 
     @staticmethod
-    def _set_default_datetimes(**kwargs: dict[str, Any]) -> dict[str, Any]:
+    def _set_default_datetimes(**kwargs: Any) -> dict[str, Any]:
         kwargs.pop("start_date", None)
         kwargs.pop("end_date", None)
 
@@ -311,6 +321,6 @@ class OuraClient:
         return value
 
     @staticmethod
-    def _compact_params(**params: dict[str, Any]) -> dict[str, Any]:
+    def _compact_params(**params: Any) -> dict[str, Any]:
         """Remove unset optional query parameters before sending a request."""
         return {key: value for key, value in params.items() if value is not None}

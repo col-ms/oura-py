@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Any
 
+from pydantic import BaseModel
+
 
 @dataclass
 class Result:
@@ -10,7 +12,7 @@ class Result:
     data: Any
 
 
-class OuraResponse[T]:
+class OuraResponse[T: BaseModel]:
     def __init__(
         self,
         data: Any,

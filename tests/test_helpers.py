@@ -31,7 +31,7 @@ def test_init_ssl_verify_false():
 
 def test_bad_manage_init():
     with pytest.raises(TypeError):
-        RequestManager()
+        RequestManager()  # ty: ignore
 
 
 def test_good_get(manager):

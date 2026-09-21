@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 
 from oura_py.client.oura_client import OuraClient
+from oura_py.constants import WebhookDataType
 from oura_py.data.response import Result
 
 
@@ -110,13 +111,14 @@ def test_webhook_routes_use_version_root():
         "x-client-id": "client_id",
         "x-client-secret": "client_secret",
     }
-
+    data = {
+        "callback_url": "https://example.test",
+        "data_type": WebhookDataType.WORKOUT,
+    }
     client.list_webhook_subscriptions()
-    client.create_webhook_subscription({"callback_url": "https://example.test"})
+    client.create_webhook_subscription(data=data)
     client.get_webhook_subscription("sub-1")
-    client.update_webhook_subscription(
-        "sub-1", {"callback_url": "https://example.test"}
-    )
+    client.update_webhook_subscription("sub-1", data=data)
     client.renew_webhook_subscription("sub-1")
     client.delete_webhook_subscription("sub-1")
 
@@ -128,12 +130,12 @@ def test_webhook_routes_use_version_root():
     )
     client._manager.post.assert_called_once_with(
         endpoint="../webhook/subscription",
-        data={"callback_url": "https://example.test"},
+        data=data,
         headers=headers,
     )
     client._manager.put.assert_any_call(
         "../webhook/subscription/sub-1",
-        data={"callback_url": "https://example.test"},
+        data=data,
         headers=headers,
     )
     client._manager.put.assert_any_call(

@@ -72,7 +72,7 @@ def test_enum_values_are_validated():
             activity="running",
             day="2025-01-01",
             end_datetime="2025-01-01T10:00:00Z",
-            intensity="invalid",
+            intensity="invalid",  # ty: ignore
             source="manual",
             start_datetime="2025-01-01T09:00:00Z",
         )
