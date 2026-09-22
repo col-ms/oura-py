@@ -1,4 +1,4 @@
-name: Release confidence
+name: CI
 
 on:
   push:
@@ -83,7 +83,6 @@ jobs:
           name: distributions
           path: dist
       - name: Install the distribution in a clean environment
-        shell: bash
         run: |
           python -m venv .venv-install
           .venv-install/bin/python -m pip install --upgrade pip
@@ -95,6 +94,5 @@ jobs:
           .venv-install/bin/python -m pip install "$package"
           .venv-install/bin/python -m pip check
       - name: Verify the standard installation
-        shell: bash
         run: |
           .venv-install/bin/python -c "from importlib.resources import files; from oura_py.data import models; assert models.PersonalInfo; assert files('oura_py').joinpath('py.typed').is_file()"

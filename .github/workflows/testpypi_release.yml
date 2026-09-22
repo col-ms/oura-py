@@ -9,8 +9,6 @@
 name: Upload to TestPyPI
 
 on:
-  push:
-    tags: ["v*"]
   workflow_dispatch:
 
 permissions:
