@@ -4,7 +4,17 @@
 
 ## Installation
 
-Proper installation documentation to be added upon first production release.
+This package can be installed from PyPI using either `pip` or `uv`:
+
+```bash
+pip install oura-py
+```
+
+or
+
+```bash
+uv add oura-py
+```
 
 ## Authentication
 
